@@ -49,6 +49,8 @@ class ChecklistViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        // large fonts for navigation controller title
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
 
     // UITableView asks for the number of rows in the section, since we only have 5 rows to display, we simply return 5
@@ -64,10 +66,8 @@ class ChecklistViewController: UITableViewController {
         
         let item = items[indexPath.row]
         
-        // using tags is the same as using @IBOutlet to refernce object in the storyboard
-        let label = cell.viewWithTag(1000) as! UILabel
-        label.text = item.text
-        configCheckmark(for: cell, at: indexPath)
+        configureText(for: cell, with: item)
+        configureCheckmark(for: cell, with: item)
         return cell
     }
     
@@ -78,8 +78,8 @@ class ChecklistViewController: UITableViewController {
         if let cell = tableView.cellForRow(at:  indexPath)
         {
             let item = items[indexPath.row]
-            item.checked = !item.checked
-            configCheckmark(for: cell, at: indexPath)
+            item.toggleChecked()
+            configureCheckmark(for: cell, with: item)
 
         }
         
@@ -87,15 +87,46 @@ class ChecklistViewController: UITableViewController {
         
     }
     
-    func configCheckmark(for cell: UITableViewCell, at indexPath: IndexPath)
-    {
-        let item = items[indexPath.row]
+    // swipe to delete rows and cells
+    // 1. delete a row from data model
+    // 2. delete the cell from the table view
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        // 1
+        items.remove(at: indexPath.row)
         
+        // 2
+        let indexPaths = [indexPath]
+        tableView.deleteRows(at: indexPaths, with: .automatic)
+    }
+    
+    func configureCheckmark(for cell: UITableViewCell, with item: ChecklistItem) {
         if item.checked {
             cell.accessoryType = .checkmark
         } else {
             cell.accessoryType = .none
         }
+    }
+    
+    func configureText(for cell: UITableViewCell, with item: ChecklistItem) {
+        // we can't use @IBOutlet to reference the table cells because we don't know how many cells there will be. If the table view contains static cells, then we can use @IBOutlet
+        let label = cell.viewWithTag(1000) as! UILabel
+        label.text = item.text
+    }
+    
+    // add button on the navigation controller
+    // 1. add a new checklistitem
+    // 2. add this item to the array data model
+    // 3. insert a new cell in the table view for the new row
+    // you have to add new data in the model and add a new cell for the data, model and view have to be sync or your app will crash
+    @IBAction func addItem() {
+        let newRowIndex = items.count
+        let item = ChecklistItem()
+        item.text = "I am a new row"
+        item.checked = false
+        items.append(item)
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
+        tableView.insertRows(at: indexPaths, with: .automatic)
     }
 
 }
