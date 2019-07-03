@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AllListsViewController: UITableViewController {
+class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate {
     
     var lists = [Checklist]()
 
@@ -25,6 +25,28 @@ class AllListsViewController: UITableViewController {
         lists.append(list)
         list = Checklist(name: "To Do")
         lists.append(list)
+    }
+    
+    // MARK:- List Detail View Controller Delegates
+    func listDetailViewControllerDidCancel(_ controller: ListDetailViewController) {
+        navigationController?.popViewController(animated: true)
+    }
+    func listDetailViewController(_ controller: ListDetailViewController, didFinishAdding checklist: Checklist) {
+        let newRowIndex = lists.count
+        lists.append(checklist)
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
+        tableView.insertRows(at: indexPaths, with: .automatic)
+        navigationController?.popViewController(animated: true)
+    }
+    func listDetailViewController(_ controller: ListDetailViewController, didFinishEditing checklist: Checklist) {
+        if let index = lists.index(of: checklist) {
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = tableView.cellForRow(at: indexPath) {
+                cell.textLabel!.text = checklist.name
+            }
+        }
+        navigationController?.popViewController(animated: true)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -51,7 +73,31 @@ class AllListsViewController: UITableViewController {
             let controller = segue.destination as! ChecklistViewController
             controller.checklist = sender as! Checklist
             print("prepare method at AllListsViewController")
+        } else if segue.identifier == "AddChecklist" {
+            let controller = segue.destination as! ListDetailViewController
+            controller.delegate = self
         }
+    }
+    
+    // swipe and delete the checklist rows
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        lists.remove(at: indexPath.row)
+        
+        let indexPaths = [indexPath]
+        tableView.deleteRows(at: indexPaths, with: .automatic)
+    }
+    
+    // this method is the same as using the EditChecklist segue
+    // when tapped the accessory button, find the ListDetailViewController, set its delegate
+    // pass the checklistToEdit to its properties, then show the view 
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        let controller = storyboard!.instantiateViewController(withIdentifier: "ListDetailViewController") as! ListDetailViewController
+        
+        controller.delegate = self
+        let checklist = lists[indexPath.row]
+        controller.checklistToEdit = checklist
+        
+        navigationController?.pushViewController(controller, animated: true)
     }
     
     func makeCell(for tableView: UITableView) -> UITableViewCell{
