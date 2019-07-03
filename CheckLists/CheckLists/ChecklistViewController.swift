@@ -8,7 +8,25 @@
 
 import UIKit
 
-class ChecklistViewController: UITableViewController {
+class ChecklistViewController: UITableViewController, AddItemViewControllerDelegate {
+    
+    // delegate handles the messages sent from AddItemViewController here
+    func addItemViewControllerDidCancel(_ controller: AddItemViewController) {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    // 1. insert new item to the array, which is the data model
+    // 2. add one more row to the table view. 
+    func addItemViewController(_ controller: AddItemViewController, didFinishAdding item: ChecklistItem) {
+        let newRowIndex = items.count
+        items.append(item)
+        
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
+        tableView.insertRows(at: indexPaths, with: .automatic)
+        navigationController?.popViewController(animated: true)
+    }
+    
     
     // declare a variable of array type of ChecklistItem
     var items: [ChecklistItem]
@@ -88,8 +106,8 @@ class ChecklistViewController: UITableViewController {
     }
     
     // swipe to delete rows and cells
-    // 1. delete a row from data model
-    // 2. delete the cell from the table view
+    // 1. delete the item from data model
+    // 2. delete the row from the table view
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         // 1
         items.remove(at: indexPath.row)
@@ -97,6 +115,16 @@ class ChecklistViewController: UITableViewController {
         // 2
         let indexPaths = [indexPath]
         tableView.deleteRows(at: indexPaths, with: .automatic)
+    }
+    
+    // prepare method is invoked when a segue from one screen to another is about to performed
+    // as! is a type cast, because destination is the type of UIViewController and AddItemViewController is it subclass
+    // then create the connection that make AddItemViewControllerDelegate to be itself, which is ChecklistViewController
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "AddItem" {
+            let controller = segue.destination as! AddItemViewController
+            controller.delegate = self
+        }
     }
     
     func configureCheckmark(for cell: UITableViewCell, with item: ChecklistItem) {
@@ -111,22 +139,6 @@ class ChecklistViewController: UITableViewController {
         // we can't use @IBOutlet to reference the table cells because we don't know how many cells there will be. If the table view contains static cells, then we can use @IBOutlet
         let label = cell.viewWithTag(1000) as! UILabel
         label.text = item.text
-    }
-    
-    // add button on the navigation controller
-    // 1. add a new checklistitem
-    // 2. add this item to the array data model
-    // 3. insert a new cell in the table view for the new row
-    // you have to add new data in the model and add a new cell for the data, model and view have to be sync or your app will crash
-    @IBAction func addItem() {
-        let newRowIndex = items.count
-        let item = ChecklistItem()
-        item.text = "I am a new row"
-        item.checked = false
-        items.append(item)
-        let indexPath = IndexPath(row: newRowIndex, section: 0)
-        let indexPaths = [indexPath]
-        tableView.insertRows(at: indexPaths, with: .automatic)
     }
 
 }
