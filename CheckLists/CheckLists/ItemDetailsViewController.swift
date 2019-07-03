@@ -1,5 +1,5 @@
 //
-//  AddItemViewController.swift
+//  itemDetailsViewController.swift
 //  CheckLists
 //
 //  Created by yuancheng on 2/7/19.
@@ -9,12 +9,12 @@
 import UIKit
 
 // a protocol are a group of methods without implementation, any object that use this protocol must have these methods declared
-protocol AddItemViewControllerDelegate: class {
-    func addItemViewControllerDidCancel(_ controller: ItemDetailsViewController)
+protocol ItemDetailsViewControllerDelegate: class {
+    func itemDetailsViewControllerDidCancel(_ controller: ItemDetailsViewController)
     
-    func addItemViewController(_ controller: ItemDetailsViewController, didFinishAdding item: ChecklistItem)
+    func itemDetailsViewController(_ controller: ItemDetailsViewController, didFinishAdding item: ChecklistItem)
     
-    func addItemViewController(_ controller: ItemDetailsViewController, didFinishEditing item: ChecklistItem)
+    func itemDetailsViewController(_ controller: ItemDetailsViewController, didFinishEditing item: ChecklistItem)
 }
 
 class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
@@ -25,7 +25,7 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
     // weak: the relationship between the view and its delegate. ChecklistView has a strong reference to AddItemView, and now AddItemView only has a weak reference to ChecklistView, so there is no ownership cycle, no potenital memory leak
     // delegate are always made weak
     // question mark: the delegates are optional
-    weak var delegate: AddItemViewControllerDelegate?
+    weak var delegate: ItemDetailsViewControllerDelegate?
     
     var itemToEdit: ChecklistItem?
     
@@ -65,23 +65,23 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
     }
     
     // @IBAction functions never return values
-    // when user tap cancel button, send addItemViewControllerDidCancel message to its delegate
+    // when user tap cancel button, send itemDetailsViewControllerDidCancel message to its delegate
     // the question mark indicates that if the delegate is nil, which measn not exist, then don't send the message
     @IBAction func cancel() {
-        delegate?.addItemViewControllerDidCancel(self)
+        delegate?.itemDetailsViewControllerDidCancel(self)
     }
     @IBAction func done() {
         //print("Contents of the text field: \(textField.text!)")
         if let itemToEdit = itemToEdit {
             itemToEdit.text = textField.text!
-            delegate?.addItemViewController(self, didFinishEditing: itemToEdit)
+            delegate?.itemDetailsViewController(self, didFinishEditing: itemToEdit)
         }
         else {
             let item = ChecklistItem()
             item.text = textField.text!
             item.checked = false
             
-            delegate?.addItemViewController(self, didFinishAdding: item)
+            delegate?.itemDetailsViewController(self, didFinishAdding: item)
         }
     }
 
