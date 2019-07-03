@@ -13,9 +13,11 @@ class ChecklistViewController: UITableViewController, ItemDetailsViewControllerD
     // declare a variable of array type of ChecklistItem
     var items: [ChecklistItem]
     
+    var checklist: Checklist!
+    
     required init?(coder aDecoder: NSCoder) {
         items = [ChecklistItem]()
-        print("initializer goes first")
+        print("initializer at ChecklistViewController")
         super.init(coder: aDecoder)
     }
     
@@ -61,10 +63,11 @@ class ChecklistViewController: UITableViewController, ItemDetailsViewControllerD
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         // large fonts for navigation controller title
-        navigationController?.navigationBar.prefersLargeTitles = true
-        print("viewDidLoad goes next")
+        navigationItem.largeTitleDisplayMode = .never
+        print("viewDidLoad at ChecklistViewController")
         print("data file path is: \(dataFilePath())")
         loadChecklistitems()
+        title = checklist.name
     }
 
     // UITableView asks for the number of rows in the section, since we only have 5 rows to display, we simply return 5
