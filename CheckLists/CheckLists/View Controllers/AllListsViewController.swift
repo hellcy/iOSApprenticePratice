@@ -8,8 +8,29 @@
 
 import UIKit
 
-class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate {
+class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate, UINavigationControllerDelegate {
     var dataModel: DataModel!
+    
+    // this method is called when this view is about the become visible, before viewDidAppear
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
+    }
+    
+    // this method will be called when the view become visible, check userDefaults and if index is not -1, we perform a certain segue to another view
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // need to set AllListsViewController to be NavigationController's delegate, otherwise delegate method won't be called
+        navigationController?.delegate = self
+        
+        print("viewDidAppear")
+        let index = dataModel.indexOfSelectedChecklist
+        if index >= 0 && index < dataModel.lists.count {
+            let checklist = dataModel.lists[index]
+            performSegue(withIdentifier: "ShowChecklist", sender: checklist)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,20 +42,14 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         navigationController?.popViewController(animated: true)
     }
     func listDetailViewController(_ controller: ListDetailViewController, didFinishAdding checklist: Checklist) {
-        let newRowIndex = dataModel.lists.count
         dataModel.lists.append(checklist)
-        let indexPath = IndexPath(row: newRowIndex, section: 0)
-        let indexPaths = [indexPath]
-        tableView.insertRows(at: indexPaths, with: .automatic)
+        dataModel.sortChecklists()
+        tableView.reloadData()
         navigationController?.popViewController(animated: true)
     }
     func listDetailViewController(_ controller: ListDetailViewController, didFinishEditing checklist: Checklist) {
-        if let index = dataModel.lists.firstIndex(of: checklist) {
-            let indexPath = IndexPath(row: index, section: 0)
-            if let cell = tableView.cellForRow(at: indexPath) {
-                cell.textLabel!.text = checklist.name
-            }
-        }
+        dataModel.sortChecklists()
+        tableView.reloadData()
         navigationController?.popViewController(animated: true)
     }
 
@@ -49,12 +64,23 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         let cell = makeCell(for: tableView)
         let checklist = dataModel.lists[indexPath.row]
         cell.textLabel!.text = checklist.name
+        let count = checklist.countUncheckedItems()
+        if checklist.items.count == 0 {
+            cell.detailTextLabel!.text = "(No Items)"
+        } else if count == 0 {
+            cell.detailTextLabel!.text = "All done!"
+        } else {
+            cell.detailTextLabel!.text = "\(count) Remaining"
+        }
         cell.accessoryType = .detailDisclosureButton
-
+        cell.imageView!.image = UIImage(named: checklist.iconName)
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // store last opened checklist in the userDefaults
+        dataModel.indexOfSelectedChecklist = indexPath.row
+        
         let checklist = dataModel.lists[indexPath.row]
         performSegue(withIdentifier: "ShowChecklist", sender: checklist)
     }
@@ -95,6 +121,15 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         }
     }
     
+    // MARK: - UINavigationController delegate
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        // was the back button tapped?
+        if viewController === self {
+            dataModel.indexOfSelectedChecklist = -1
+            print("willShow: userdefaults now -1")
+        }
+    }
+    
     // MARK: - custom methods
     // when the data row is asking for a cell to be displayed, we check if there is a idle cell available first using dequeueResuableCell, if not, we then create a new cell for the data
     func makeCell(for tableView: UITableView) -> UITableViewCell{
@@ -103,7 +138,8 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
             return cell
         }
         else {
-            return UITableViewCell(style: .default, reuseIdentifier: cellIdentifier)
+            // subtitle style add a second, smaller label below the main label
+            return UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
         }
     }
 

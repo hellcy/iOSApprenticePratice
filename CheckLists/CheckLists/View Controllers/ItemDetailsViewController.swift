@@ -21,6 +21,8 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
 
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
+    @IBOutlet weak var shouldRemindSwitch: UISwitch!
+    @IBOutlet weak var dueDateLabel: UILabel!
     
     // weak: the relationship between the view and its delegate. ChecklistView has a strong reference to AddItemView, and now AddItemView only has a weak reference to ChecklistView, so there is no ownership cycle, no potenital memory leak
     // delegate are always made weak
@@ -28,6 +30,7 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
     weak var delegate: ItemDetailsViewControllerDelegate?
     
     var itemToEdit: ChecklistItem?
+    var dueDate = Date()
     
     override func viewDidLoad() {
         super.viewDidLoad()

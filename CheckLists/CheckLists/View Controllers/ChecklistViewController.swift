@@ -128,6 +128,7 @@ class ChecklistViewController: UITableViewController, ItemDetailsViewControllerD
     // MARK: - custom methods
     func configureCheckmark(for cell: UITableViewCell, with item: ChecklistItem) {
         let label = cell.viewWithTag(1001) as! UILabel
+        label.textColor = view.tintColor
         if item.checked {
             label.text = "√"
         } else {
@@ -138,7 +139,8 @@ class ChecklistViewController: UITableViewController, ItemDetailsViewControllerD
     func configureText(for cell: UITableViewCell, with item: ChecklistItem) {
         // we can't use @IBOutlet to reference the table cells because we don't know how many cells there will be. If the table view contains static cells, then we can use @IBOutlet
         let label = cell.viewWithTag(1000) as! UILabel
-        label.text = item.text
+        //label.text = item.text
+        label.text = "\(item.itemID): \(item.text)"
     }
 
 }
