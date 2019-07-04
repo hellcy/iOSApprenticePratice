@@ -9,22 +9,11 @@
 import UIKit
 
 class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate {
+    var dataModel: DataModel!
     
-    var lists = [Checklist]()
-
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
-        
-        var list = Checklist(name: "Birthdays")
-        lists.append(list)
-        
-        list = Checklist(name: "Groceries")
-        lists.append(list)
-        list = Checklist(name: "Cool Apps")
-        lists.append(list)
-        list = Checklist(name: "To Do")
-        lists.append(list)
     }
     
     // MARK:- List Detail View Controller Delegates
@@ -32,15 +21,15 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         navigationController?.popViewController(animated: true)
     }
     func listDetailViewController(_ controller: ListDetailViewController, didFinishAdding checklist: Checklist) {
-        let newRowIndex = lists.count
-        lists.append(checklist)
+        let newRowIndex = dataModel.lists.count
+        dataModel.lists.append(checklist)
         let indexPath = IndexPath(row: newRowIndex, section: 0)
         let indexPaths = [indexPath]
         tableView.insertRows(at: indexPaths, with: .automatic)
         navigationController?.popViewController(animated: true)
     }
     func listDetailViewController(_ controller: ListDetailViewController, didFinishEditing checklist: Checklist) {
-        if let index = lists.index(of: checklist) {
+        if let index = dataModel.lists.firstIndex(of: checklist) {
             let indexPath = IndexPath(row: index, section: 0)
             if let cell = tableView.cellForRow(at: indexPath) {
                 cell.textLabel!.text = checklist.name
@@ -49,14 +38,16 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         navigationController?.popViewController(animated: true)
     }
 
+    // MARK:- UITable View Delegates
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return lists.count
+        return dataModel.lists.count
     }
 
+    // this method is called when new row of data is ready to be displayed, we assign the properties of checklist(the data) to the cell
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = makeCell(for: tableView)
-        let checklist = lists[indexPath.row]
+        let checklist = dataModel.lists[indexPath.row]
         cell.textLabel!.text = checklist.name
         cell.accessoryType = .detailDisclosureButton
 
@@ -64,10 +55,35 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let checklist = lists[indexPath.row]
+        let checklist = dataModel.lists[indexPath.row]
         performSegue(withIdentifier: "ShowChecklist", sender: checklist)
     }
     
+    // swipe and delete the checklist rows
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        dataModel.lists.remove(at: indexPath.row)
+        
+        let indexPaths = [indexPath]
+        tableView.deleteRows(at: indexPaths, with: .automatic)
+    }
+    
+    // this method is the same as using the EditChecklist segue
+    // when tapped the accessory button, find the ListDetailViewController, set its delegate
+    // pass the checklistToEdit to its properties, then show the view
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        let controller = storyboard!.instantiateViewController(withIdentifier: "ListDetailViewController") as! ListDetailViewController
+        
+        controller.delegate = self
+        let checklist = dataModel.lists[indexPath.row]
+        controller.checklistToEdit = checklist
+        
+        navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    // MARK: - UIStoryboardSegue prepare delegate
+    // remember the sender is the item that trigger the segue
+    // if ShowChecklist is performed, the sender now is the Checklist cell we tapped, so pass it to the ChecklistViewController, we need it to change the title name
+    // if AddChecklist is performed, we make this controller the delegate of ListDetailViewController
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowChecklist" {
             let controller = segue.destination as! ChecklistViewController
@@ -79,27 +95,8 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         }
     }
     
-    // swipe and delete the checklist rows
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        lists.remove(at: indexPath.row)
-        
-        let indexPaths = [indexPath]
-        tableView.deleteRows(at: indexPaths, with: .automatic)
-    }
-    
-    // this method is the same as using the EditChecklist segue
-    // when tapped the accessory button, find the ListDetailViewController, set its delegate
-    // pass the checklistToEdit to its properties, then show the view 
-    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
-        let controller = storyboard!.instantiateViewController(withIdentifier: "ListDetailViewController") as! ListDetailViewController
-        
-        controller.delegate = self
-        let checklist = lists[indexPath.row]
-        controller.checklistToEdit = checklist
-        
-        navigationController?.pushViewController(controller, animated: true)
-    }
-    
+    // MARK: - custom methods
+    // when the data row is asking for a cell to be displayed, we check if there is a idle cell available first using dequeueResuableCell, if not, we then create a new cell for the data
     func makeCell(for tableView: UITableView) -> UITableViewCell{
         let cellIdentifier = "Cell"
         if let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) {

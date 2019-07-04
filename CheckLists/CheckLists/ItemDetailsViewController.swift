@@ -39,6 +39,13 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
         }
     }
     
+    // make textField focus when enter the screen
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        textField.becomeFirstResponder()
+    }
+    
+    // MARK: - UITableView delegate
     // disable cell selection for adding item
     // the func is expected to return a IndexPath type value, but the question mark at the end indicates that it also accepts nil value, here it means, no rows would be selected
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath)
@@ -46,13 +53,7 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
             return nil
     }
     
-    // make textField focus when enter the screen
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        textField.becomeFirstResponder()
-    }
-    
-    // delegate method for textField
+    // MARK: - UITextField delegate
     // check the text field, disable the Done button at the navigation bar if the text field is empty
     // we don't know the new text at first, we only know the changes, so calculate the text yourself
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -64,6 +65,7 @@ class ItemDetailsViewController: UITableViewController, UITextFieldDelegate {
         return true
     }
     
+    // MARK: - Actions
     // @IBAction functions never return values
     // when user tap cancel button, send itemDetailsViewControllerDidCancel message to its delegate
     // the question mark indicates that if the delegate is nil, which measn not exist, then don't send the message
