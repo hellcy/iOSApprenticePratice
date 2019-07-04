@@ -292,6 +292,9 @@
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="ina-6U-F77">
                                                     <rect key="frame" x="253" y="6" width="51" height="31"/>
+                                                    <connections>
+                                                        <action selector="shouldRemindToggled:" destination="XLG-cz-h7S" eventType="valueChanged" id="rcQ-zi-sJ1"/>
+                                                    </connections>
                                                 </switch>
                                             </subviews>
                                             <constraints>
@@ -345,6 +348,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="datePicker" destination="hFf-Ta-ZMG" id="zUq-d8-laW"/>
+                        <outlet property="datePickerCell" destination="Ezz-NI-mqz" id="haA-eX-dj8"/>
                         <outlet property="doneBarButton" destination="eS0-8o-Vin" id="7ry-iU-BF0"/>
                         <outlet property="dueDateLabel" destination="oQh-y0-gc9" id="pAS-EU-KoD"/>
                         <outlet property="shouldRemindSwitch" destination="ina-6U-F77" id="JR5-Ya-4hi"/>
@@ -352,6 +357,31 @@
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VtO-6n-IQs" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" id="Ezz-NI-mqz">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="217"/>
+                    <autoresizingMask key="autoresizingMask"/>
+                    <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Ezz-NI-mqz" id="vX7-X6-Kub">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="216.5"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="hFf-Ta-ZMG">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="216.5"/>
+                                <date key="date" timeIntervalSinceReferenceDate="583932164.62401795">
+                                    <!--2019-07-04 11:22:44 +0000-->
+                                </date>
+                                <connections>
+                                    <action selector="dateChanged:" destination="XLG-cz-h7S" eventType="valueChanged" id="dcU-tK-XbM"/>
+                                </connections>
+                            </datePicker>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="hFf-Ta-ZMG" firstAttribute="top" secondItem="vX7-X6-Kub" secondAttribute="top" id="A8v-Qx-hFe"/>
+                            <constraint firstAttribute="trailing" secondItem="hFf-Ta-ZMG" secondAttribute="trailing" id="TCD-R8-l6o"/>
+                            <constraint firstItem="hFf-Ta-ZMG" firstAttribute="leading" secondItem="vX7-X6-Kub" secondAttribute="leading" id="cFc-Lz-gyO"/>
+                            <constraint firstAttribute="bottom" secondItem="hFf-Ta-ZMG" secondAttribute="bottom" id="rC8-Gq-QLH"/>
+                        </constraints>
+                    </tableViewCellContentView>
+                </tableViewCell>
             </objects>
             <point key="canvasLocation" x="2383" y="135"/>
         </scene>
