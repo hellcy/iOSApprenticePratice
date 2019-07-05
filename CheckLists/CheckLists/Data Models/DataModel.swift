@@ -86,6 +86,7 @@ class DataModel {
         })
     }
     
+    
     // when a key doesn't exist, UserDefault will return 0, we don't want that because that's a valid row number, so instead we set the key and initial value when app starts.
     func registerDefaults(){
         let dictionary: [String:Any] = ["ChecklistIndex": -1, "FirstTime": true]

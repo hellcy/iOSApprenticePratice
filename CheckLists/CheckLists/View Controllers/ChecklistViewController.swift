@@ -40,22 +40,25 @@ class ChecklistViewController: UITableViewController, ItemDetailsViewControllerD
     // 1. insert new item to the array, which is the data model
     // 2. add one more row to the table view. 
     func itemDetailsViewController(_ controller: ItemDetailsViewController, didFinishAdding item: ChecklistItem) {
-        let newRowIndex = checklist.items.count
+        //let newRowIndex = checklist.items.count
         checklist.items.append(item)
-        
-        let indexPath = IndexPath(row: newRowIndex, section: 0)
-        let indexPaths = [indexPath]
-        tableView.insertRows(at: indexPaths, with: .automatic)
+        checklist.sortChecklistItems()
+        tableView.reloadData()
+//        let indexPath = IndexPath(row: newRowIndex, section: 0)
+//        let indexPaths = [indexPath]
+//        tableView.insertRows(at: indexPaths, with: .automatic)
         navigationController?.popViewController(animated: true)
     }
     
     func itemDetailsViewController(_ controller: ItemDetailsViewController, didFinishEditing item: ChecklistItem) {
-        if let index = checklist.items.firstIndex(of: item) {
-            let indexPath = IndexPath(row: index, section: 0)
-            if let cell = tableView.cellForRow(at: indexPath) {
-                configureText(for: cell, with: item)
-            }
-        }
+//        if let index = checklist.items.firstIndex(of: item) {
+//            let indexPath = IndexPath(row: index, section: 0)
+//            if let cell = tableView.cellForRow(at: indexPath) {
+//                configureText(for: cell, with: item)
+//            }
+//        }
+        checklist.sortChecklistItems()
+        tableView.reloadData()
         navigationController?.popViewController(animated: true)
     }
 
@@ -141,6 +144,11 @@ class ChecklistViewController: UITableViewController, ItemDetailsViewControllerD
         let label = cell.viewWithTag(1000) as! UILabel
         label.text = item.text
         //label.text = "\(item.itemID): \(item.text)"
+        let dueDateLabel = cell.viewWithTag(1002) as! UILabel
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        dueDateLabel.text = formatter.string(from: item.dueDate)
     }
 
 }

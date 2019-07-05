@@ -119,14 +119,14 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Add Checklist" largeTitleDisplayMode="never" id="er1-KG-Tb3">
-                        <barButtonItem key="leftBarButtonItem" enabled="NO" style="done" systemItem="done" id="TZV-jf-eBp">
-                            <connections>
-                                <action selector="done" destination="eaM-u9-Qoj" id="qXQ-ou-6C8"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="cancel" id="2lh-Fm-iK9">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="2lh-Fm-iK9">
                             <connections>
                                 <action selector="cancel" destination="eaM-u9-Qoj" id="3bc-k9-TFh"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" style="done" systemItem="done" id="TZV-jf-eBp">
+                            <connections>
+                                <action selector="done" destination="eaM-u9-Qoj" id="qXQ-ou-6C8"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -195,7 +195,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="1000" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BOl-aa-5hs">
-                                            <rect key="frame" x="32" y="11.5" width="220" height="21"/>
+                                            <rect key="frame" x="32" y="3" width="220" height="21"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -209,13 +209,23 @@
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" tag="1002" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8HS-OU-Fhv">
+                                            <rect key="frame" x="32" y="25" width="220" height="15"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
                                     </subviews>
                                     <constraints>
                                         <constraint firstAttribute="trailing" secondItem="BOl-aa-5hs" secondAttribute="trailing" id="2Ha-ht-V6v"/>
                                         <constraint firstItem="TNg-K9-r8T" firstAttribute="leading" secondItem="wtV-NM-l0v" secondAttribute="leading" constant="8" id="2KO-3w-Wok"/>
                                         <constraint firstItem="TNg-K9-r8T" firstAttribute="centerY" secondItem="wtV-NM-l0v" secondAttribute="centerY" id="64K-lF-2ak"/>
                                         <constraint firstItem="BOl-aa-5hs" firstAttribute="leading" secondItem="TNg-K9-r8T" secondAttribute="trailing" constant="8" id="Sy3-JG-1n3"/>
-                                        <constraint firstItem="BOl-aa-5hs" firstAttribute="centerY" secondItem="wtV-NM-l0v" secondAttribute="centerY" id="g88-Ee-Q3e"/>
+                                        <constraint firstItem="8HS-OU-Fhv" firstAttribute="leading" secondItem="TNg-K9-r8T" secondAttribute="trailing" constant="8" id="Uf6-5m-CUf"/>
+                                        <constraint firstItem="BOl-aa-5hs" firstAttribute="top" secondItem="wtV-NM-l0v" secondAttribute="top" constant="3" id="b9S-0S-ZJr"/>
+                                        <constraint firstAttribute="trailing" secondItem="8HS-OU-Fhv" secondAttribute="trailing" id="czV-XN-jjU"/>
+                                        <constraint firstAttribute="trailing" secondItem="8HS-OU-Fhv" secondAttribute="trailing" id="t3X-Qr-dZF"/>
+                                        <constraint firstItem="8HS-OU-Fhv" firstAttribute="top" secondItem="wtV-NM-l0v" secondAttribute="top" constant="25" id="vpM-VZ-0C2"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
@@ -228,7 +238,7 @@
                             <outlet property="delegate" destination="IDI-5s-z1v" id="Dd9-na-MA8"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Name of the Checklist" id="geW-OC-2QC">
+                    <navigationItem key="navigationItem" title="Name of the Checklist" largeTitleDisplayMode="never" id="geW-OC-2QC">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="UVJ-t9-e7V">
                             <connections>
                                 <segue destination="XLG-cz-h7S" kind="show" identifier="AddItem" id="nJo-qy-AsO"/>
@@ -336,14 +346,14 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Add Item" largeTitleDisplayMode="never" id="Gnx-eN-efL">
-                        <barButtonItem key="leftBarButtonItem" enabled="NO" style="done" systemItem="done" id="eS0-8o-Vin">
-                            <connections>
-                                <action selector="done" destination="XLG-cz-h7S" id="2p0-wJ-a1w"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="cancel" id="RM6-hw-gRJ">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="RM6-hw-gRJ">
                             <connections>
                                 <action selector="cancel" destination="XLG-cz-h7S" id="MKD-j2-XXp"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" style="done" systemItem="done" id="eS0-8o-Vin">
+                            <connections>
+                                <action selector="done" destination="XLG-cz-h7S" id="2p0-wJ-a1w"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
