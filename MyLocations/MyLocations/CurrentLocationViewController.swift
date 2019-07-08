@@ -32,11 +32,22 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
     // track the time for updating location
     var timer: Timer?
 
-
+    // Override: viewDidload() method is from its superclass: UIViewController, and bacause of CurrentLocationViewController is inherited from UIViewController, it has all its variables and methods. But it makes some changes to fit its own purpose, so we override this method, and super.viewDidLoad means that we simply call the method in its super class. 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         updateLabels()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.isNavigationBarHidden = true
+    }
+    
+    // just before view disappear and go to the locationDetails view
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.isNavigationBarHidden = false
     }
     
     // MARK: - Action methods
@@ -277,6 +288,16 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
 
         if location == nil {
             lastLocationError = NSError(domain: "MyLocationErrorDomain", code: 1, userInfo: nil)
+        }
+    }
+    
+    //MARK: - Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // go to LocationDetailsViewController, so pass all values needed from here
+        if segue.identifier == "TagLocation" {
+            let controller = segue.destination as! LocationDetailsViewController
+            controller.coordinate = location!.coordinate
+            controller.placemark = placemark
         }
     }
 }
