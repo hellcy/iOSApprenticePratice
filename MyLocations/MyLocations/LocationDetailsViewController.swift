@@ -31,10 +31,12 @@ class LocationDetailsViewController: UITableViewController {
     var coordinate = CLLocationCoordinate2D(latitude: 0, longitude: 0)
     var placemark: CLPlacemark?
     
+    var categoryName = "No Category"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         descriptionTextView.text = ""
-        categoryLabel.text = ""
+        categoryLabel.text = categoryName
         
         latitudeLabel.text = String(format: "%.8f", coordinate.latitude)
         longitudeLabel.text = String(format: "%.8f", coordinate.longitude)
@@ -46,17 +48,53 @@ class LocationDetailsViewController: UITableViewController {
         }
         
         dateLabel.text = format(date: Date())
+        
+        // Hide keyboard when user tapped somewhere else other than the textView table cell
+        // gestureRecongnizer can recognize a tap, when this happens, a message will be sent to 'target', and the 'action' is the message to send.
+        let gestureRecongnizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        gestureRecongnizer.cancelsTouchesInView = false
+        tableView.addGestureRecognizer(gestureRecongnizer)
+    }
+    
+    // MARK: - Navigation
+    // prepare method is the place for passing values
+    // here we are passing categoryName value to another view
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "PickCategory" {
+            let controller = segue.destination as! CategoryPickerViewController
+            controller.selectedCategoryName = categoryName
+        }
     }
     
     //MARK: - Actions
     @IBAction func done(){
-        navigationController?.popViewController(animated: true)
+        let hudView = HudView.hud(inView: navigationController!.view, animated: true)
+        hudView.text = "Tagged"
         
+        // go back to the previous view after a certain period of time, asyncAfter method takes a closure as its second parameter, everything inside the closure will not be executed after some time.
+        let delayInSeconds = 0.6
+        // using the closure outside the method: trailing closure syntax
+        afterDelay(delayInSeconds) {
+            hudView.hide(animated: true)
+        }
+        afterDelay(delayInSeconds) {
+            self.navigationController!.view.isUserInteractionEnabled = true
+            hudView.removeFromSuperview()
+            self.navigationController?.popViewController(animated: true)
+        }
     }
     
     @IBAction func cancel(){
         navigationController?.popViewController(animated: true)
     }
+    
+    // unwind segue is an action method that takes a segue as its parameter, it will leave the source view and go to this view, also could pass values from that view to this view.
+    @IBAction func categoryPickerDidPickCategory(_ segue: UIStoryboardSegue) {
+        let controller = segue.source as! CategoryPickerViewController
+        categoryName = controller.selectedCategoryName
+        categoryLabel.text = categoryName
+    }
+    
     
     // MARK: - Table View Delegates
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -67,6 +105,9 @@ class LocationDetailsViewController: UITableViewController {
         // Address
         else if indexPath.section == 2 && indexPath.row == 2 {
             // 1.set the width of the label to be 120 points less than the width of the entire view, and height as much as possible so we can word-wrapping
+            // difference between bounds and frame:
+            // frame: describes the position and size of a view in its parent view.
+            // bound: describes the position and size inside the view
             addressLabel.frame.size = CGSize(width: view.bounds.size.width - 120, height: 10000)
             // 2. reduce the height to fit the words
             addressLabel.sizeToFit()
@@ -78,6 +119,23 @@ class LocationDetailsViewController: UITableViewController {
         // other table cells
         else {
             return 44
+        }
+    }
+    
+    // the app only response to the first two sections of the table, the third section is read only
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if indexPath.section == 0 || indexPath.section == 1 {
+            return indexPath
+        } else {
+            return nil
+        }
+    }
+    
+    // when user tapped on the decription cell, let the textView become active so the keyboard will come up
+    // there is a margin between the textView and the frame of the cell that contains the textView, so there is a small chance when user tapped inside the cell, but outside the textView. Normally, the keyboard wouldn't come up because user didn't tap on the textView, so this method is to let the keyboard come up even when user tapped outside the textView but inside the table cell.
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 0 && indexPath.row == 0 {
+            descriptionTextView.becomeFirstResponder()
         }
     }
     
@@ -110,6 +168,17 @@ class LocationDetailsViewController: UITableViewController {
     // convert Date to String
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
+    }
+    
+    @objc func hideKeyboard(_ gestureRecognizer: UIGestureRecognizer) {
+        let point = gestureRecognizer.location(in: tableView)
+        // indexPath returned by indexPathForRow is an optional instance, becasue when user tapped on somewhere between two sections or on the section header, indexPath will have no value.
+        let indexPath = tableView.indexPathForRow(at: point)
+        
+        if indexPath != nil && indexPath!.section == 0 && indexPath!.row == 0 {
+            return
+        }
+        descriptionTextView.resignFirstResponder()
     }
     
 }
