@@ -38,30 +38,27 @@ class LocationsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "LocationCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "LocationCell", for: indexPath) as! LocationCell
         
         let location = locations[indexPath.row]
-        
-        let descriptionLabel = cell.viewWithTag(100) as! UILabel
-        descriptionLabel.text = location.locationDescription
-        
-        let addressLabel = cell.viewWithTag(101) as! UILabel
-        if let placemark = location.placemark {
-            var text = ""
-            if let s = placemark.subThoroughfare {
-                text += s + " "
-            }
-            if let s = placemark.thoroughfare {
-                text += s + ", "
-            }
-            if let s = placemark.locality {
-                text += s
-            }
-            addressLabel.text = text
-        } else {
-            addressLabel.text = ""
-        }
+        cell.configure(for: location)
         
         return cell
+    }
+    
+    // MARK: - Navgition
+    
+    // sender has type of any, if the segue was triggered from a table view, sender is of type UITableViewCell, if segue was triggered from a button, sender is of type UIBarButtonItem...
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // if EditLocation, pass the Core Data and the selected location to the LocationDetailsViewController
+        if segue.identifier == "EditLocation" {
+            let controller = segue.destination as! LocationDetailsViewController
+            controller.managedObjectContext = managedObejctContext
+            
+            if let indexPath = tableView.indexPath(for: sender as! UITableViewCell) {
+                let location = locations[indexPath.row]
+                controller.locationToEdit = location
+            }
+        }
     }
 }
