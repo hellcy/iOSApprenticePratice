@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreLocation
+import CoreData
 
 class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate {
     
@@ -31,6 +32,8 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
     
     // track the time for updating location
     var timer: Timer?
+    
+    var managedObjectContext: NSManagedObjectContext!
 
     // Override: viewDidload() method is from its superclass: UIViewController, and bacause of CurrentLocationViewController is inherited from UIViewController, it has all its variables and methods. But it makes some changes to fit its own purpose, so we override this method, and super.viewDidLoad means that we simply call the method in its super class. 
     override func viewDidLoad() {
@@ -298,6 +301,8 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
             let controller = segue.destination as! LocationDetailsViewController
             controller.coordinate = location!.coordinate
             controller.placemark = placemark
+            // pass the core data variable to the next view. CurrentLocationViewController doesn't really need managedObjectContext, it only adds it as its property to pass it along.
+            controller.managedObjectContext = managedObjectContext
         }
     }
 }

@@ -7,15 +7,46 @@
 //
 
 import UIKit
+import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    // variables to access Core Data
+    // lazy variable will not execute the code in the {}() block until someone asks for it. In this case, it is at the didFinishLaunchingWithOptions when we pass managedObjctContext to the CurrentLocationViewController
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "DataModel")
+        container.loadPersistentStores(completionHandler: {
+            storeDescription, error in
+            if let error = error {
+                fatalError("Could load data store: \(error)")
+            }
+        })
+        return container
+    }()
+    
+    lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        let tabController = window!.rootViewController as! UITabBarController
+        if let tabViewControllers = tabController.viewControllers {
+            // finds the CuurentLocationViewController and pass the managedObjectContext property to it.
+            var navController = tabViewControllers[0] as! UINavigationController
+            let controller1 = navController.viewControllers.first as! CurrentLocationViewController
+            controller1.managedObjectContext = managedObjectContext
+            // LocationsViewController in the second tab also needs managedObjectContext, so we need to pass the object to this view controller as well
+            navController = tabViewControllers[1] as! UINavigationController
+            let controller2 = navController.viewControllers.first as! LocationsViewController
+            controller2.managedObejctContext = managedObjectContext
+        }
+        
+        print(applicationDocumentDirectory)
+        
+        // listen for the notification calls for CoreDataSaveFailed
+        listenForFatalCoreDataNotifications()
         return true
     }
 
@@ -39,6 +70,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+    // MARK: - Helper methods
+    func listenForFatalCoreDataNotifications(){
+        // 1 whenever a CoreDataSaveFailedNotification is posted, perform the following code in the closure
+        NotificationCenter.default.addObserver(forName: CoreDataFailedNotification, object: nil, queue: OperationQueue.main, using: { notification in
+            // 2 set up the error message, triple quotes indicates a multi-line string
+            let message = """
+There was a fatal error in the app and it cannot continue.
+
+Press OK to terminate the app. Sorry for the inconvenience.
+"""
+            // 3 create a UIAlertController to show the error message
+            let alert = UIAlertController(title: "Internal Error", message: message, preferredStyle: .alert)
+            // 4 add an action for the alert's OK button
+            let action = UIAlertAction(title: "OK", style: .default) {
+                _ in
+                let exception = NSException(name: NSExceptionName.internalInconsistencyException, reason: "Fatal Core Data error", userInfo: nil)
+                exception.raise()
+            }
+            alert.addAction(action)
+            
+            // 5 use a view controller to present the alert, simply use the root view controller is fine, and in this app the root view controller is the tab bar controller
+            let tabController = self.window!.rootViewController!
+            tabController.present(alert, animated: true, completion: nil)
+        })
     }
 
 

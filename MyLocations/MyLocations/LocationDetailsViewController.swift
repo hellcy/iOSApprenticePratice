@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreLocation
+import CoreData
 
 // this is a private global variable, it lives outside of the LocationDetailsViewController but only visible inside it. so we don't need to create a instance of it everytime we go to LocationDetailsViewController, the reason is that dataFormatter is a quiet expensive variable to create, it takes time and battery. So we want to reuse it as much as possible.
 // what behind the dateFormatter global is a closure, it creates and initializes the new DateFormatter object, and return its value to the global constant.
@@ -33,6 +34,9 @@ class LocationDetailsViewController: UITableViewController {
     
     var categoryName = "No Category"
     
+    var managedObjectContext: NSManagedObjectContext!
+    var date = Date()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         descriptionTextView.text = ""
@@ -47,7 +51,7 @@ class LocationDetailsViewController: UITableViewController {
             addressLabel.text = "No Address Found"
         }
         
-        dateLabel.text = format(date: Date())
+        dateLabel.text = format(date: date)
         
         // Hide keyboard when user tapped somewhere else other than the textView table cell
         // gestureRecongnizer can recognize a tap, when this happens, a message will be sent to 'target', and the 'action' is the message to send.
@@ -71,16 +75,27 @@ class LocationDetailsViewController: UITableViewController {
         let hudView = HudView.hud(inView: navigationController!.view, animated: true)
         hudView.text = "Tagged"
         
-        // go back to the previous view after a certain period of time, asyncAfter method takes a closure as its second parameter, everything inside the closure will not be executed after some time.
-        let delayInSeconds = 0.6
-        // using the closure outside the method: trailing closure syntax
-        afterDelay(delayInSeconds) {
-            hudView.hide(animated: true)
-        }
-        afterDelay(delayInSeconds) {
-            self.navigationController!.view.isUserInteractionEnabled = true
-            hudView.removeFromSuperview()
-            self.navigationController?.popViewController(animated: true)
+        // 1 create a new location instance, initialize it with managedObjectContext
+        let location = Location(context: managedObjectContext)
+        // 2 assign values to location
+        location.locationDescription = descriptionTextView.text
+        location.category = categoryName
+        location.latitude = coordinate.latitude
+        location.longitude = coordinate.longitude
+        location.date = date
+        location.placemark = placemark
+        // 3 save to data store, catch failures if save was not successful
+        do {
+            try managedObjectContext.save()
+            // using the closure outside the method: trailing closure syntax
+            // go back to the previous view after a certain period of time, asyncAfter method takes a closure as its second parameter, everything inside the closure will not be executed after some time.
+            afterDelay(0.6) {
+                hudView.hide()
+                self.navigationController?.popViewController(animated: true)
+            }
+        } catch {
+            // 4 output the error message
+            fatalCoreDataError(error)
         }
     }
     
