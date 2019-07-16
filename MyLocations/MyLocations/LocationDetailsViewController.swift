@@ -37,6 +37,7 @@ class LocationDetailsViewController: UITableViewController {
     var managedObjectContext: NSManagedObjectContext!
     var date = Date()
     
+    // didSet block will be called everytime you put a new value into that variable. Because prepare is performed in LocationsViewController, so didSet is called before viewDidLoad start, so we already have the right values.
     var locationToEdit: Location? {
         didSet {
             if let location = locationToEdit {
@@ -90,10 +91,18 @@ class LocationDetailsViewController: UITableViewController {
     //MARK: - Actions
     @IBAction func done(){
         let hudView = HudView.hud(inView: navigationController!.view, animated: true)
-        hudView.text = "Tagged"
         
-        // 1 create a new location instance, initialize it with managedObjectContext
-        let location = Location(context: managedObjectContext)
+        let location: Location
+        if let temp = locationToEdit {
+            // if locationToEdit is not null, we are editing locations, so instead of creating a new location from Core Data, we grab values from temp.
+            hudView.text = "Updated"
+            location = temp
+        } else {
+            // 1 create a new location instance, initialize it with managedObjectContext
+            hudView.text = "Tagged"
+            location = Location(context: managedObjectContext)
+        }
+        
         // 2 assign values to location
         location.locationDescription = descriptionTextView.text
         location.category = categoryName
