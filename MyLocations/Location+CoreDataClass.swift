@@ -29,4 +29,38 @@ public class Location: NSManagedObject, MKAnnotation {
     public var subtitle: String? {
         return category
     }
+    
+    var hasPhoto: Bool {
+        return photoID != nil
+    }
+    
+    var photoURL: URL {
+        // assertion is a special debugging tool that is used to check that your code always does something valid
+        assert(photoID != nil, "No photo ID set")
+        let filename = "Photo-\(photoID!.intValue).jpg"
+        return applicationDocumentDirectory.appendingPathComponent(filename)
+    }
+    
+    var photoImage: UIImage? {
+        return UIImage(contentsOfFile: photoURL.path)
+    }
+    
+    class func nextPhotoID() -> Int {
+        let userDefaults = UserDefaults.standard
+        let currentID = userDefaults.integer(forKey: "PhotoID") + 1
+        userDefaults.set(currentID, forKey: "PhotoID")
+        userDefaults.synchronize()
+        return currentID
+    }
+    
+    // remove the photo from a location
+    func removePhotoFile() {
+        if hasPhoto {
+            do {
+                try FileManager.default.removeItem(at: photoURL)
+            } catch {
+                print("*** Error removing file: \(error)")
+            }
+        }
+    }
 }

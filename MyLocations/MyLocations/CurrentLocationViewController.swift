@@ -260,27 +260,17 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
         // 1. empty variable string for address
         var line1 = ""
         // 2. subThoroughfare is just a fancy name for street number
-        if let s = placemark.subThoroughfare {
-            line1 += s + " "
-        }
+        line1.add(text: placemark.subThoroughfare)
         // 3. thoroughfare is the street number
-        if let s = placemark.thoroughfare {
-            line1 += s
-        }
-        // 4. locality = city, administrativeArea = state, postalCode = postal Code
-        var line2 = ""
-        if let s = placemark.locality {
-            line2 += s + " "
-        }
-        if let s = placemark.administrativeArea {
-            line2 += s + " "
-        }
-        if let s = placemark.postalCode {
-            line2 += s
-        }
+        line1.add(text: placemark.thoroughfare, separatedBy: " ")
         
-        // 5. Combine two string together
-        return line1 + "\n" + line2
+        var line2 = ""
+        // 4. locality = city, administrativeArea = state, postalCode = postal Code
+        line2.add(text: placemark.locality)
+        line2.add(text: placemark.administrativeArea, separatedBy: " ")
+        
+        line1.add(text: line2, separatedBy: "\n")
+        return line1
     }
     
     // this method has @objc keyword before its name because we declared it as being accessiable from Objective-C

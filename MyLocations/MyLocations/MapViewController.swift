@@ -125,7 +125,7 @@ extension MapViewController: MKMapViewDelegate {
             pinView.isEnabled = true
             pinView.canShowCallout = true
             pinView.animatesDrop = false
-            pinView.pinTintColor = UIColor(red: 0.32, green: 0.82, blue: 0.4, alpha: 1)
+            pinView.pinTintColor = UIColor(white: 0.0, alpha: 0.5)
             // 4 create a button, when clicked, will perform showLocationDetails method, and this button is hooked with an annotation's accessoryView, so everytime when we click an annoatation, we actually clicked a button and called a method.
             let rightButton = UIButton(type: .detailDisclosure)
             rightButton.addTarget(self, action: #selector(showLocationDetails), for: .touchUpInside)

@@ -30,6 +30,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // change the app appearance
+        customizeAppearance()
         // Override point for customization after application launch.
         let tabController = window!.rootViewController as! UITabBarController
         if let tabViewControllers = tabController.viewControllers {
@@ -101,6 +103,16 @@ Press OK to terminate the app. Sorry for the inconvenience.
             let tabController = self.window!.rootViewController!
             tabController.present(alert, animated: true, completion: nil)
         })
+    }
+    
+    //customizing app UI
+    func customizeAppearance() {
+        UINavigationBar.appearance().barTintColor = UIColor.black
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+        
+        UITabBar.appearance().barTintColor = UIColor.black
+        let tintColor = UIColor(red: 255/255.0, green: 238/255.0, blue: 136/255.0, alpha: 1.0)
+        UITabBar.appearance().tintColor = tintColor
     }
 
 
