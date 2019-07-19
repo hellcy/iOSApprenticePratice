@@ -63,7 +63,7 @@ class LocationsViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         let sectionInfo = fetchedResultsController.sections![section]
-        return sectionInfo.name
+        return sectionInfo.name.uppercased()
     }
     
     // this method enable swipe-to-delete, when we delete a row, gets the Location object and tell the context to delete the object, this will trigger the NSFetchedResultsController to send a notification to the delegate, the update the table view.
@@ -95,7 +95,9 @@ class LocationsViewController: UITableViewController {
         let viewRect = CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.sectionHeaderHeight)
         let view = UIView(frame: viewRect)
         view.backgroundColor = UIColor(white: 0, alpha: 0.85)
-        
+        view.addSubview(label)
+        view.addSubview(separator)
+        return view
     }
     
     // MARK: - Navgition

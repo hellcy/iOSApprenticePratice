@@ -15,13 +15,13 @@
 		763C95AC22CF09880029FBF2 /* CurrentLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763C95AB22CF09880029FBF2 /* CurrentLocationViewController.swift */; };
 		763C95B122CF09880029FBF2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 763C95AF22CF09880029FBF2 /* Main.storyboard */; };
 		763C95B322CF098C0029FBF2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 763C95B222CF098C0029FBF2 /* Assets.xcassets */; };
-		763C95B622CF098C0029FBF2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 763C95B422CF098C0029FBF2 /* LaunchScreen.storyboard */; };
 		763E954122D30757007ADC74 /* LocationDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763E954022D30757007ADC74 /* LocationDetailsViewController.swift */; };
 		763E954322D32009007ADC74 /* CategoryPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763E954222D32009007ADC74 /* CategoryPickerViewController.swift */; };
 		76B4FBFA22E03494008DF23A /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B4FBF922E03494008DF23A /* UIImage+Resize.swift */; };
 		76B4FBFC22E039B5008DF23A /* String+AddText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B4FBFB22E039B5008DF23A /* String+AddText.swift */; };
 		76B4FBFE22E043C5008DF23A /* MyTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B4FBFD22E043C5008DF23A /* MyTabBarController.swift */; };
 		76B4FC0222E044DF008DF23A /* MyImagePickerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B4FC0122E044DF008DF23A /* MyImagePickerController.swift */; };
+		76B4FC0522E186BA008DF23A /* Sound.caf in Resources */ = {isa = PBXBuildFile; fileRef = 76B4FC0422E186BA008DF23A /* Sound.caf */; };
 		76C983AC22D84DF700781C8E /* HudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C983AB22D84DF700781C8E /* HudView.swift */; };
 		76C983AE22D8614600781C8E /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C983AD22D8614600781C8E /* Functions.swift */; };
 		76C983B122D8641600781C8E /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 76C983AF22D8641600781C8E /* DataModel.xcdatamodeld */; };
@@ -39,7 +39,6 @@
 		763C95AB22CF09880029FBF2 /* CurrentLocationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentLocationViewController.swift; sourceTree = "<group>"; };
 		763C95B022CF09880029FBF2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		763C95B222CF098C0029FBF2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		763C95B522CF098C0029FBF2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		763C95B722CF098C0029FBF2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		763E954022D30757007ADC74 /* LocationDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDetailsViewController.swift; sourceTree = "<group>"; };
 		763E954222D32009007ADC74 /* CategoryPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPickerViewController.swift; sourceTree = "<group>"; };
@@ -47,6 +46,7 @@
 		76B4FBFB22E039B5008DF23A /* String+AddText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+AddText.swift"; sourceTree = "<group>"; };
 		76B4FBFD22E043C5008DF23A /* MyTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyTabBarController.swift; sourceTree = "<group>"; };
 		76B4FC0122E044DF008DF23A /* MyImagePickerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyImagePickerController.swift; sourceTree = "<group>"; };
+		76B4FC0422E186BA008DF23A /* Sound.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sound.caf; sourceTree = "<group>"; };
 		76C983AB22D84DF700781C8E /* HudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudView.swift; sourceTree = "<group>"; };
 		76C983AD22D8614600781C8E /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		76C983B022D8641600781C8E /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -82,6 +82,7 @@
 				763C95A822CF09880029FBF2 /* MyLocations */,
 				763C95A722CF09880029FBF2 /* Products */,
 				762D2DE322DEE9D300FF23C5 /* Frameworks */,
+				76B4FC0322E186BA008DF23A /* Sound */,
 			);
 			sourceTree = "<group>";
 		};
@@ -110,12 +111,20 @@
 				76B4FBF922E03494008DF23A /* UIImage+Resize.swift */,
 				76B4FBFB22E039B5008DF23A /* String+AddText.swift */,
 				763C95AF22CF09880029FBF2 /* Main.storyboard */,
-				763C95B422CF098C0029FBF2 /* LaunchScreen.storyboard */,
 				763C95B722CF098C0029FBF2 /* Info.plist */,
 				76C983AF22D8641600781C8E /* DataModel.xcdatamodeld */,
 				763C95B222CF098C0029FBF2 /* Assets.xcassets */,
 			);
 			path = MyLocations;
+			sourceTree = "<group>";
+		};
+		76B4FC0322E186BA008DF23A /* Sound */ = {
+			isa = PBXGroup;
+			children = (
+				76B4FC0422E186BA008DF23A /* Sound.caf */,
+			);
+			name = Sound;
+			path = "../../iOS_Apprentice_v6.0/my-locations/Resources/Sound";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -181,8 +190,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				763C95B622CF098C0029FBF2 /* LaunchScreen.storyboard in Resources */,
 				763C95B322CF098C0029FBF2 /* Assets.xcassets in Resources */,
+				76B4FC0522E186BA008DF23A /* Sound.caf in Resources */,
 				763C95B122CF09880029FBF2 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,14 +231,6 @@
 				763C95B022CF09880029FBF2 /* Base */,
 			);
 			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		763C95B422CF098C0029FBF2 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				763C95B522CF098C0029FBF2 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -355,6 +356,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5SVL6S654Z;
 				INFOPLIST_FILE = MyLocations/Info.plist;
@@ -373,6 +375,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5SVL6S654Z;
 				INFOPLIST_FILE = MyLocations/Info.plist;

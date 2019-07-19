@@ -238,6 +238,13 @@ class LocationDetailsViewController: UITableViewController {
         }
     }
     
+    // we need to change the background color for selection highlighting, willDisplay delegate method will be called before a cell becomes visible, so we can do some last minuts customizations here
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let selection = UIView(frame: CGRect.zero)
+        selection.backgroundColor = UIColor(white: 1.0, alpha: 0.2)
+        cell.selectedBackgroundView = selection
+    }
+    
     //MARK:- Private Methods
     // convert CLPlacemark to String
     func string(from placemark: CLPlacemark) -> String {
