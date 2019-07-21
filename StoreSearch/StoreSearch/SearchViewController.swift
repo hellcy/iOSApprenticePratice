@@ -9,6 +9,12 @@
 import UIKit
 
 class SearchViewController: UIViewController {
+    
+    struct TableViewCellIdentifiers {
+        // static value can be used without an instance so you don't need to initialize TableViewCellIdentifiers before you can use it
+        static let searchResultCell = "SearchResultCell"
+        static let nothingFoundCell = "NothingFoundCell"
+    }
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
@@ -21,8 +27,14 @@ class SearchViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         // add a 64 points margin to the top, 20 for the status bar and 44 for the search bar
-        tableView.contentInset = UIEdgeInsets(top: 64, left: 0,
-                                              bottom: 0, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0)
+        // change the cell height to 80
+        tableView.rowHeight = 80
+        // register nib files for use
+        var cellNib = UINib(nibName: TableViewCellIdentifiers.searchResultCell, bundle: nil)
+        tableView.register(cellNib, forCellReuseIdentifier: TableViewCellIdentifiers.searchResultCell)
+        cellNib = UINib(nibName:TableViewCellIdentifiers.nothingFoundCell, bundle: nil)
+        tableView.register(cellNib, forCellReuseIdentifier: TableViewCellIdentifiers.nothingFoundCell)
     }
 
 
@@ -68,25 +80,17 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     // assign data to cells to display
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cellIdentifier = "SearchResultCell"
-        var cell:UITableViewCell! = tableView.dequeueReusableCell(
-            withIdentifier: cellIdentifier)
-        if cell == nil {
-            cell = UITableViewCell(style: .subtitle,
-                                   reuseIdentifier: cellIdentifier)
-        }
-        
-        // check if searchResults returns no data (search failed)
+        // assign values from searchResults data model to the cell. nameLabel and artistNameLabel are customer cell's outlets properties defined in the nib file
         if searchResults.count == 0 {
-            cell.textLabel!.text = "(Nothing found)"
-            cell.detailTextLabel!.text = ""
+            return tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.nothingFoundCell, for: indexPath)
         } else {
-            // add searchResult values to cell
+            // using the customer table view cell SearchResultCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.searchResultCell, for: indexPath) as! SearchResultCell
             let searchResult = searchResults[indexPath.row]
-            cell.textLabel!.text = searchResult.name
-            cell.detailTextLabel!.text = searchResult.artistName
+            cell.nameLabel.text = searchResult.name
+            cell.artistNameLabel.text = searchResult.artistName
+            return cell
         }
-        return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
