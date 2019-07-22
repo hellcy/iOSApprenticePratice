@@ -13,6 +13,8 @@ class SearchResultCell: UITableViewCell {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var artistNameLabel: UILabel!
     @IBOutlet weak var artworkImageView: UIImageView!
+    
+    var downloadTask: URLSessionDownloadTask?
 
     // The awakeFromNib() method is called after this cell object has been loaded from the nib but before the cell is added to the table view. You can use this method to do additional work to prepare the object for use. That’s perfect for creating the view with the selection color.
     override func awakeFromNib() {
@@ -26,6 +28,29 @@ class SearchResultCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        downloadTask?.cancel()
+        downloadTask = nil
+        print("*** downloading cancelled")
+    }
+    
+    // MARK:- Public Methods
+    func configure(for result: SearchResult) {
+        nameLabel.text = result.name
+        
+        if result.artistName.isEmpty {
+            artistNameLabel.text = "Unknown"
+        } else {
+            artistNameLabel.text = String(format: "%@ (%@)", result.artistName, result.type)
+        }
+        
+        artworkImageView.image = UIImage(named: "Placeholder")
+        if let smallURL = URL(string: result.imageSmall) {
+            downloadTask = artworkImageView.loadImage(url: smallURL)
+        }
     }
 
 }

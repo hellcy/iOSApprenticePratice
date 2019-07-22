@@ -19,17 +19,19 @@ class SearchViewController: UIViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     // data model
     var searchResults = [SearchResult]()
     var hasSearched = false
     var isLoading = false
+    var dataTask: URLSessionDataTask?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         // add a 64 points margin to the top, 20 for the status bar and 44 for the search bar
-        tableView.contentInset = UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 108, left: 0, bottom: 0, right: 0)
         // change the cell height to 80
         tableView.rowHeight = 80
         // register nib files for use
@@ -43,14 +45,27 @@ class SearchViewController: UIViewController {
         // display keyboard when app has open
         searchBar.becomeFirstResponder()
     }
-
+    
+    // MARK: - Action Methods
+    @IBAction func segmentChanged(_ sender: UISegmentedControl) {
+        performSearch()
+    }
+    
     // MARK:- Private Methods
     // This method first builds a URL string by placing the search text behind the “term=” parameter, and then turns this string into a URL object. Because URL(string:) is a failable initializer, it returns an optional. You force unwrap that using url! to return an actual URL object.
-    func iTunesURL(searchText: String) -> URL {
+    func iTunesURL(searchText: String, category: Int) -> URL {
         //This calls the addingPercentEncoding(withAllowedCharacters:) method to create a new string where all the special characters are escaped, and you use that string for the search term.
+        let kind: String
+        switch category {
+        case 1: kind = "musicTrack"
+        case 2: kind = "software"
+        case 3: kind = "ebook"
+        default: kind = ""
+        }
         let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
-        let urlString = String(format:
-            "https://itunes.apple.com/search?term=%@&limit=200", encodedText)
+        
+        let urlString = "https://itunes.apple.com/search?term=\(encodedText)&limit=200&entity=\(kind)"
+        
         let url = URL(string: urlString)
         return url!
     }
@@ -80,25 +95,28 @@ class SearchViewController: UIViewController {
 
 // MRAK: - Search Bar Delegate Methods
 extension SearchViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    func performSearch() {
         if !searchBar.text!.isEmpty {
             // dismiss the keyboard
             searchBar.resignFirstResponder()
+            // If there is an active data task, this cancels it, making sure that no old searches can ever get in the way of the new search.
+            dataTask?.cancel()
             isLoading = true
             tableView.reloadData()
             // empty the previous stored data every time user click Search button
             searchResults = []
             hasSearched = true
             // 1 Create the URL object using the search text
-            let url = iTunesURL(searchText: searchBar.text!)
+            let url = iTunesURL(searchText: searchBar.text!, category: segmentedControl.selectedSegmentIndex)
             // 2 Get a shared URLSession instance, which uses the default configuration with respect to caching, cookies, and other web stuff
             let session = URLSession.shared
             // 3 Create a data task. Data tasks are for fetching the contents of a given URL. The code from the completion handler will be invoked when the data task has received a response from the server.
-            let dataTask = session.dataTask(with: url, completionHandler: {
+            dataTask = session.dataTask(with: url, completionHandler: {
                 data, response, error in
                 // 4 response holds the server’s response code and headers, and data contains the actual data fetched from the server, in this case a blob of JSON.
-                if let error = error {
-                    print("Failure! \(error)")
+                if let error = error as NSError?, error.code == -999 {
+                    // Search was cancelled
+                    return
                 } else if let httpResponse = response as? HTTPURLResponse,
                     httpResponse.statusCode == 200 {
                     if let data = data {
@@ -124,8 +142,12 @@ extension SearchViewController: UISearchBarDelegate {
                 }
             })
             // 5 once you have created the data task, you need to call resume() to start it. This sends the request to the server on a background thread. So, the app is immediately free to continue (URLSession is as asynchronous as they come).
-            dataTask.resume()
+            dataTask?.resume()
         }
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        performSearch()
     }
     
     // attach the search bar to the top of the screen
@@ -164,12 +186,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             // using the customer table view cell SearchResultCell
             let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.searchResultCell, for: indexPath) as! SearchResultCell
             let searchResult = searchResults[indexPath.row]
-            cell.nameLabel.text = searchResult.name
-            if searchResult.artistName.isEmpty {
-                cell.artistNameLabel.text = "Unknown"
-            } else {
-                cell.artistNameLabel.text = String(format: "%@ (%@)", searchResult.artistName, searchResult.type)
-            }
+            cell.configure(for: searchResult)
             return cell
         }
     }
