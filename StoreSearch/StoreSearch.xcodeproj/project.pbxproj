@@ -16,6 +16,7 @@
 		7626DE6022E52A3A00B8A09F /* SearchResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7626DE5F22E52A3A00B8A09F /* SearchResultCell.xib */; };
 		7626DE6222E52EEC00B8A09F /* SearchResultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7626DE6122E52EEC00B8A09F /* SearchResultCell.swift */; };
 		7626DE6422E531CF00B8A09F /* NothingFoundCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7626DE6322E531CF00B8A09F /* NothingFoundCell.xib */; };
+		7626DE6622E5592D00B8A09F /* LoadingCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7626DE6522E5592D00B8A09F /* LoadingCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		7626DE5F22E52A3A00B8A09F /* SearchResultCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchResultCell.xib; sourceTree = "<group>"; };
 		7626DE6122E52EEC00B8A09F /* SearchResultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultCell.swift; sourceTree = "<group>"; };
 		7626DE6322E531CF00B8A09F /* NothingFoundCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NothingFoundCell.xib; sourceTree = "<group>"; };
+		7626DE6522E5592D00B8A09F /* LoadingCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoadingCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +70,7 @@
 				7626DE6122E52EEC00B8A09F /* SearchResultCell.swift */,
 				7626DE5F22E52A3A00B8A09F /* SearchResultCell.xib */,
 				7626DE6322E531CF00B8A09F /* NothingFoundCell.xib */,
+				7626DE6522E5592D00B8A09F /* LoadingCell.xib */,
 				5DE6377322E3F6B600C9D515 /* Main.storyboard */,
 				5DE6377822E3F6B700C9D515 /* LaunchScreen.storyboard */,
 				5DE6377B22E3F6B800C9D515 /* Info.plist */,
@@ -136,6 +139,7 @@
 			files = (
 				5DE6377A22E3F6B700C9D515 /* LaunchScreen.storyboard in Resources */,
 				5DE6377722E3F6B700C9D515 /* Assets.xcassets in Resources */,
+				7626DE6622E5592D00B8A09F /* LoadingCell.xib in Resources */,
 				7626DE6022E52A3A00B8A09F /* SearchResultCell.xib in Resources */,
 				7626DE6422E531CF00B8A09F /* NothingFoundCell.xib in Resources */,
 				5DE6377522E3F6B600C9D515 /* Main.storyboard in Resources */,

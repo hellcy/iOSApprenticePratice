@@ -14,6 +14,7 @@ class SearchViewController: UIViewController {
         // static value can be used without an instance so you don't need to initialize TableViewCellIdentifiers before you can use it
         static let searchResultCell = "SearchResultCell"
         static let nothingFoundCell = "NothingFoundCell"
+        static let loadingCell = "LoadingCell"
     }
 
     @IBOutlet weak var searchBar: UISearchBar!
@@ -22,6 +23,7 @@ class SearchViewController: UIViewController {
     // data model
     var searchResults = [SearchResult]()
     var hasSearched = false
+    var isLoading = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +37,8 @@ class SearchViewController: UIViewController {
         tableView.register(cellNib, forCellReuseIdentifier: TableViewCellIdentifiers.searchResultCell)
         cellNib = UINib(nibName:TableViewCellIdentifiers.nothingFoundCell, bundle: nil)
         tableView.register(cellNib, forCellReuseIdentifier: TableViewCellIdentifiers.nothingFoundCell)
+        cellNib = UINib(nibName: TableViewCellIdentifiers.loadingCell, bundle: nil)
+        tableView.register(cellNib, forCellReuseIdentifier: TableViewCellIdentifiers.loadingCell)
         
         // display keyboard when app has open
         searchBar.becomeFirstResponder()
@@ -46,7 +50,7 @@ class SearchViewController: UIViewController {
         //This calls the addingPercentEncoding(withAllowedCharacters:) method to create a new string where all the special characters are escaped, and you use that string for the search term.
         let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
         let urlString = String(format:
-            "https://itunes.apple.com/search?term=%@", encodedText)
+            "https://itunes.apple.com/search?term=%@&limit=200", encodedText)
         let url = URL(string: urlString)
         return url!
     }
@@ -91,18 +95,32 @@ extension SearchViewController: UISearchBarDelegate {
         if !searchBar.text!.isEmpty {
             // dismiss the keyboard
             searchBar.resignFirstResponder()
+            isLoading = true
+            tableView.reloadData()
             // empty the previous stored data every time user click Search button
             searchResults = []
             hasSearched = true
-            let url = iTunesURL(searchText: searchBar.text!)
-            print("URL: '\(url)'")
-            if let data = performStoreRequest(with: url) {
-                // pass the parsed JSON data to data model
-                searchResults = parse(data: data)
-                // sort the searchResults array alphabetically
-                searchResults.sort(by: <)
+            let url = self.iTunesURL(searchText: searchBar.text!)
+            // 1 This gets a reference to the queue. You’re using a “global” queue, which is a queue provided by the system. You can also create your own queues, but using a standard queue is fine for this app
+            let queue = DispatchQueue.global()
+            // 2 Once you have the queue, you can dispatch a closure on it - everything between queue.async { and the closing } is the closure. Whatever code in the closure will be put on the queue and be executed asynchronously in the background. After scheduling this closure, the main thread is immediately free to continue. It is no longer blocked
+            queue.async {
+                // code that needs to run in the background
+                if let data = self.performStoreRequest(with: url) {
+                    // pass the JSON data to data model
+                    self.searchResults = self.parse(data: data)
+                    // sort the data alphabetically
+                    self.searchResults.sort(by: <)
+                    // 3 With DispatchQueue.main.async you can schedule a new closure on the main queue. This new closure sets isLoading back to false and reloads the table view. Note that self is required because this code sits inside a closure
+                    // while you do your work in a background thread, you still have to switch over to the main thread to do any user interface updates.
+                    DispatchQueue.main.async {
+                        // update the user interface
+                        self.isLoading = false
+                        self.tableView.reloadData()
+                    }
+                    return
+                }
             }
-            tableView.reloadData()
         }
     }
     
@@ -116,7 +134,9 @@ extension SearchViewController: UISearchBarDelegate {
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     // number of cells to display
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if !hasSearched {
+        if isLoading {
+            return 1
+        } else if !hasSearched {
             return 0
         } else if searchResults.count == 0 {
             return 1
@@ -127,8 +147,14 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     // assign data to cells to display
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if isLoading {
+            let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.loadingCell, for: indexPath)
+            let spinner = cell.viewWithTag(100) as! UIActivityIndicatorView
+            spinner.startAnimating()
+            return cell
+        }
         // assign values from searchResults data model to the cell. nameLabel and artistNameLabel are customer cell's outlets properties defined in the nib file
-        if searchResults.count == 0 {
+        else if searchResults.count == 0 {
             return tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.nothingFoundCell, for: indexPath)
         } else {
             // using the customer table view cell SearchResultCell
@@ -150,7 +176,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     // make sure user can't select cell when there is no searchResults
     func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        if searchResults.count == 0 {
+        if searchResults.count == 0 || isLoading {
             return nil
         } else {
             return indexPath
