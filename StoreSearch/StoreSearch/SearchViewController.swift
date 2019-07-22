@@ -40,26 +40,70 @@ class SearchViewController: UIViewController {
         searchBar.becomeFirstResponder()
     }
 
+    // MARK:- Private Methods
+    // This method first builds a URL string by placing the search text behind the “term=” parameter, and then turns this string into a URL object. Because URL(string:) is a failable initializer, it returns an optional. You force unwrap that using url! to return an actual URL object.
+    func iTunesURL(searchText: String) -> URL {
+        //This calls the addingPercentEncoding(withAllowedCharacters:) method to create a new string where all the special characters are escaped, and you use that string for the search term.
+        let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
+        let urlString = String(format:
+            "https://itunes.apple.com/search?term=%@", encodedText)
+        let url = URL(string: urlString)
+        return url!
+    }
+    
+    // this method is the call to String(contentsOf:encoding:) which returns a new string object with the data it receives from the server at the other end of the URL
+    func performStoreRequest(with url: URL) -> Data? {
+        do {
+            return try Data(contentsOf:url)
+        } catch {
+            print("Download Error: \(error.localizedDescription)")
+            showNetworkError()
+            return nil
+        }
+    }
+    
+    // You use a JSONDecoder object to convert the response data from the server to a temporary ResultArray object from which you exctract the results property, which is the searchResult array
+    func parse(data: Data) -> [SearchResult] {
+        do {
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(ResultArray.self, from:data)
+            return result.results
+        } catch {
+            print("JSON Error: \(error)")
+            return []
+        }
+    }
+    
+    func showNetworkError() {
+        let alert = UIAlertController(title: "Whoops...", message: "There was an error accessing the iTunes Store." +
+            " Please try again.", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
 
 }
 
 // MRAK: - Search Bar Delegate Methods
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        // dismiss the keyboard
-        searchBar.resignFirstResponder()
-        // empty the previous stored data every time user click Search button
-        searchResults = []
-        if searchBar.text! != "justin bieber" {
-            for i in 0...2 {
-                let searchResult = SearchResult()
-                searchResult.name = String(format: "Fake Result %d for", i)
-                searchResult.artistName = searchBar.text!
-                searchResults.append(searchResult)
+        if !searchBar.text!.isEmpty {
+            // dismiss the keyboard
+            searchBar.resignFirstResponder()
+            // empty the previous stored data every time user click Search button
+            searchResults = []
+            hasSearched = true
+            let url = iTunesURL(searchText: searchBar.text!)
+            print("URL: '\(url)'")
+            if let data = performStoreRequest(with: url) {
+                // pass the parsed JSON data to data model
+                searchResults = parse(data: data)
+                // sort the searchResults array alphabetically
+                searchResults.sort(by: <)
             }
+            tableView.reloadData()
         }
-        hasSearched = true
-        tableView.reloadData()
     }
     
     // attach the search bar to the top of the screen
@@ -91,7 +135,11 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.searchResultCell, for: indexPath) as! SearchResultCell
             let searchResult = searchResults[indexPath.row]
             cell.nameLabel.text = searchResult.name
-            cell.artistNameLabel.text = searchResult.artistName
+            if searchResult.artistName.isEmpty {
+                cell.artistNameLabel.text = "Unknown"
+            } else {
+                cell.artistNameLabel.text = String(format: "%@ (%@)", searchResult.artistName, searchResult.type)
+            }
             return cell
         }
     }
