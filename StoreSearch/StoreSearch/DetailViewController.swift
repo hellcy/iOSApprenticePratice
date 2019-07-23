@@ -18,32 +18,86 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var genreLabel: UILabel!
     @IBOutlet weak var priceButton: UIButton!
     
+    // data model
+    var searchResult: SearchResult!
+    
+    var downloadTask: URLSessionDownloadTask?
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         modalPresentationStyle = .custom
         transitioningDelegate = self
     }
+    
+    deinit {
+        print("deinit \(self)")
+        // cancel image downloading if pop up view is destoried
+        downloadTask?.cancel()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         // Do any additional setup after loading the view.
+        // change the tint color for this view, the color will apply to this view and all the subviews of this view.
+        view.tintColor = UIColor(red: 20/255, green: 160/255, blue: 160/255, alpha: 1)
+        // ask the Pop-up View for its layer and then set the corner radius of that layer to 10 points. All views have a Core Animation layer
+        popupView.layer.cornerRadius = 10
+        
+        // This creates a new gesture recognizer that listens to taps anywhere in this view controller and calls the close() method in response
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(close))
+        gestureRecognizer.cancelsTouchesInView = false
+        gestureRecognizer.delegate = self
+        view.addGestureRecognizer(gestureRecognizer)
+        
+        // pass values from data model to UI
+        if searchResult != nil {
+            updateUI()
+        }
     }
     
     // MARK:- Action Methods
     @IBAction func close() {
         dismiss(animated: true, completion: nil)
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    @IBAction func openInStore() {
+        if let url = URL(string: searchResult.storeURL) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
     }
-    */
+
+    // MARK:- Helper Methods
+    func updateUI() {
+        nameLabel.text = searchResult.name
+        if searchResult.artistName.isEmpty {
+            artistNameLabel.text = "Unknown"
+        } else {
+            artistNameLabel.text = searchResult.artistName
+        }
+        
+        kindLabel.text = searchResult.type
+        genreLabel.text = searchResult.genre
+        
+        // Show price
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        //formatter.currencySymbol = searchResult.currency
+        let priceText: String
+        if searchResult.price == 0 {
+            priceText = "Free"
+        } else if let text = formatter.string(
+            from: searchResult.price as NSNumber) {
+            priceText = text
+        } else {
+            priceText = ""
+        }
+        priceButton.setTitle(priceText, for: .normal)
+        
+        // Get image
+        if let largeURL = URL(string: searchResult.imageLarge) {
+            downloadTask = artworkImageView.loadImage(url: largeURL)
+        }
+    }
 
 }
 
@@ -52,5 +106,12 @@ extension DetailViewController: UIViewControllerTransitioningDelegate {
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
         
             return DimmingPresentationController(presentedViewController: presented, presenting: presenting)
+    }
+}
+
+// returns true when the touch was on the background view
+extension DetailViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        return (touch.view === self.view)
     }
 }
