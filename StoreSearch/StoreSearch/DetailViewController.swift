@@ -42,6 +42,8 @@ class DetailViewController: UIViewController {
         view.tintColor = UIColor(red: 20/255, green: 160/255, blue: 160/255, alpha: 1)
         // ask the Pop-up View for its layer and then set the corner radius of that layer to 10 points. All views have a Core Animation layer
         popupView.layer.cornerRadius = 10
+        // make the background color clear
+        view.backgroundColor = UIColor.clear
         
         // This creates a new gesture recognizer that listens to taps anywhere in this view controller and calls the close() method in response
         let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(close))
@@ -101,11 +103,21 @@ class DetailViewController: UIViewController {
 
 }
 
+// this extension handles all methods related to the transition between SearchView and DetailView
 extension DetailViewController: UIViewControllerTransitioningDelegate {
     // The methods from this delegate protocol tell UIKit what objects it should use to perform the transition to the Detail View Controller. It will now use your new DimmingPresentationController class instead of the standard presentation controller.
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        
-            return DimmingPresentationController(presentedViewController: presented, presenting: presenting)
+        return DimmingPresentationController(presentedViewController: presented, presenting: presenting)
+    }
+    
+    // fade in animation between switching Views
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+            return BounceAnimationController()
+    }
+    
+    // popup view slide up animation
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return SlideOutAnimationController()
     }
 }
 

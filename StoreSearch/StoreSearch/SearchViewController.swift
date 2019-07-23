@@ -27,6 +27,8 @@ class SearchViewController: UIViewController {
     var isLoading = false
     var dataTask: URLSessionDataTask?
     
+    var landscapeVC: LandscapeViewController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -91,6 +93,34 @@ class SearchViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    func showLandscape(with coordinator: UIViewControllerTransitionCoordinator) {
+        // 1 It should never happen that the app instantiates a second landscape view when you’re already looking at one. The guard statement codifies this requirement.
+        guard landscapeVC == nil else { return }
+        // 2 Find the scene with the ID “LandscapeViewController” in the storyboard and instantiate it
+        landscapeVC = storyboard!.instantiateViewController( withIdentifier: "LandscapeViewController") as? LandscapeViewController
+        if let controller = landscapeVC {
+            // 3 Set the size and position of the new view controller. This makes the landscape view just as big as the SearchViewController, covering the entire screen.
+            controller.view.frame = view.bounds
+            // 4
+            view.addSubview(controller.view)
+            addChild(controller)
+            controller.didMove(toParent: self)
+        }
+    }
+    
+    func hideLandscape(with coordinator: UIViewControllerTransitionCoordinator) {
+        if let controller = landscapeVC {
+            // tell the view controller that it is leaving the view controller hierarchy (it no longer has a parent).
+            controller.willMove(toParent: nil)
+            //  remove its view from the screen
+            controller.view.removeFromSuperview()
+            // disposes of the view controller.
+            controller.removeFromParent()
+            //  remove the last strong reference to the LandscapeViewController object
+            landscapeVC = nil
+        }
+    }
+    
     // MARK:- Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowDetail" {
@@ -99,6 +129,27 @@ class SearchViewController: UIViewController {
             let indexPath = sender as! IndexPath
             let searchResult = searchResults[indexPath.row]
             detailViewController.searchResult = searchResult
+        }
+    }
+    
+    // This method is invoked whenever the trait collection for the view controller changes.
+    // Trait collection includes:
+    // The horizontal size class
+    // The vertical size class
+    // The display scale (is this a Retina screen or not?)
+    // The user interface idiom (is this an iPhone or iPad?)
+    // The preferred Dynamic Type font size
+    // And a few other things
+    override func willTransition(
+        to newCollection: UITraitCollection,
+        with coordinator: UIViewControllerTransitionCoordinator) {
+        super.willTransition(to: newCollection, with: coordinator)
+        
+        switch newCollection.verticalSizeClass {
+        case .compact:
+            showLandscape(with: coordinator)
+        case .regular, .unspecified:
+            hideLandscape(with: coordinator)
         }
     }
 
