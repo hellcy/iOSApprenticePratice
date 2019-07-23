@@ -101,10 +101,22 @@ class SearchViewController: UIViewController {
         if let controller = landscapeVC {
             // 3 Set the size and position of the new view controller. This makes the landscape view just as big as the SearchViewController, covering the entire screen.
             controller.view.frame = view.bounds
+            controller.view.alpha = 0
             // 4
             view.addSubview(controller.view)
             addChild(controller)
-            controller.didMove(toParent: self)
+            // The call to animate(alongsideTransition:completion:) takes two closures: the first is for the animation itself, the second is a “completion handler” that gets called after the animation finishes. The completion handler gives you a chance to delay the call to didMove(toParentViewController:) until the animation is over
+            coordinator.animate(alongsideTransition: { _ in
+                controller.view.alpha = 1
+                // dismiss the keyboard when transition to landscape
+                self.searchBar.resignFirstResponder()
+            }, completion: { _ in
+                controller.didMove(toParent: self)
+                // dismiss the detailView if it exists
+                if self.presentedViewController != nil {
+                    self.dismiss(animated: true, completion: nil)
+                }
+            })
         }
     }
     
@@ -112,12 +124,16 @@ class SearchViewController: UIViewController {
         if let controller = landscapeVC {
             // tell the view controller that it is leaving the view controller hierarchy (it no longer has a parent).
             controller.willMove(toParent: nil)
-            //  remove its view from the screen
-            controller.view.removeFromSuperview()
-            // disposes of the view controller.
-            controller.removeFromParent()
-            //  remove the last strong reference to the LandscapeViewController object
-            landscapeVC = nil
+            coordinator.animate(alongsideTransition: { _ in
+                controller.view.alpha = 0
+            }, completion: { _ in
+                //  remove its view from the screen
+                controller.view.removeFromSuperview()
+                // disposes of the view controller.
+                controller.removeFromParent()
+                //  remove the last strong reference to the LandscapeViewController object
+                self.landscapeVC = nil
+            })
         }
     }
     

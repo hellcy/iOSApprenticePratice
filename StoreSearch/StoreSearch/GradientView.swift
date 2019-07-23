@@ -11,11 +11,15 @@ class GradientView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor.clear
+        // pin the GradientView to the edges of the window so that it will always stretch along with the window
+        autoresizingMask = [.flexibleWidth , .flexibleHeight]
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         backgroundColor = UIColor.clear
+        // pin the GradientView to the edges of the window so that it will always stretch along with the window
+        autoresizingMask = [.flexibleWidth , .flexibleHeight]
     }
     
     override func draw(_ rect: CGRect) {
