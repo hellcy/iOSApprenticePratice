@@ -99,6 +99,7 @@ class SearchViewController: UIViewController {
         // 2 Find the scene with the ID “LandscapeViewController” in the storyboard and instantiate it
         landscapeVC = storyboard!.instantiateViewController( withIdentifier: "LandscapeViewController") as? LandscapeViewController
         if let controller = landscapeVC {
+            controller.searchResults = searchResults
             // 3 Set the size and position of the new view controller. This makes the landscape view just as big as the SearchViewController, covering the entire screen.
             controller.view.frame = view.bounds
             controller.view.alpha = 0
