@@ -14,10 +14,20 @@ class LandscapeViewController: UIViewController {
     @IBOutlet weak var pageControl: UIPageControl!
     
     // data model
-    var searchResults = [SearchResult]()
+    var search: Search!
     
     // A warning: viewWillLayoutSubviews() may be invoked more than once! For example, it’s also called when the landscape view gets removed from the screen again. You use the firstTime variable to make sure you only place the buttons once.
     private var firstTime = true
+    
+    private var downloads = [URLSessionDownloadTask]()
+    
+    // when landscape view gets destroied, cancel all image-downloading tasks.
+    deinit {
+        print("deinit \(self)")
+        for task in downloads {
+            task.cancel()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,19 +59,15 @@ class LandscapeViewController: UIViewController {
         
         if firstTime {
             firstTime = false
-            tileButtons(searchResults)
+            tileButtons(search.searchResults)
         }
     }
     
     // MARK:- Actions
     @IBAction func pageChanged(_ sender: UIPageControl) {
-        UIView.animate(withDuration: 0.3, delay: 0,
-                       options: [.curveEaseInOut], animations: {
-                        self.scrollView.contentOffset = CGPoint(
-                            x: self.scrollView.bounds.size.width *
-                                CGFloat(sender.currentPage), y: 0)
-        },
-                       completion: nil)
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+            self.scrollView.contentOffset = CGPoint(x: self.scrollView.bounds.size.width * CGFloat(sender.currentPage), y: 0)
+        }, completion: nil)
     }
     
     // MARK:- Private Methods
@@ -110,7 +116,10 @@ class LandscapeViewController: UIViewController {
         // This for in loop steps through the SearchResult objects from the array, but with a twist. By calling the array's enumerated() method, you get a tuple containing not only the next SearchResult object but also its index in the array. A tuple is nothing more than a temporary list with two or more items in it. Here, the tuple is (index, result). This is a neat trick to loop through an array and get both the objects and their indices.
         for (index, result) in searchResults.enumerated() {
             // 1 Create the UIButton object. For debugging purposes, you give each button a title with the array index. If there are 200 results in the search, you also should end up with 200 buttons. Setting the index on the button will help to verify this.
-            let button = UIButton(type: .system)
+            let button = UIButton(type: .custom)
+            button.setBackgroundImage(UIImage(named: "LandscapeButton"),
+                                      for: .normal)
+            downloadImage(for: result, andPlaceOn: button)
             button.backgroundColor = UIColor.white
             button.setTitle("\(index)", for: .normal)
             // 2 When you make a button by hand, you always have to set its frame
@@ -140,6 +149,27 @@ class LandscapeViewController: UIViewController {
         
         pageControl.numberOfPages = numPages
         pageControl.currentPage = 0
+    }
+    
+    // you capture the button with a weak reference. When LandscapeViewController is deallocated, so are the buttons. So, the completion handler’s captured button reference automatically becomes nil. The if let inside the DispatchQueue.main.async block will now safely skip button.setImage(for). No harm done. That’s why you wrote [weak button].
+    private func downloadImage(for searchResult: SearchResult,
+                               andPlaceOn button: UIButton) {
+        if let url = URL(string: searchResult.imageSmall) {
+            let task = URLSession.shared.downloadTask(with: url) {
+                [weak button] url, response, error in
+                if error == nil, let url = url,
+                    let data = try? Data(contentsOf: url),
+                    let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        if let button = button {
+                            button.setImage(image, for: .normal)
+                        }
+                    }
+                }
+            }
+            downloads.append(task)
+            task.resume()
+        }
     }
 
 }

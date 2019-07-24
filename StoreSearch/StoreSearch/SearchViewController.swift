@@ -22,10 +22,7 @@ class SearchViewController: UIViewController {
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     // data model
-    var searchResults = [SearchResult]()
-    var hasSearched = false
-    var isLoading = false
-    var dataTask: URLSessionDataTask?
+    private let search = Search()
     
     var landscapeVC: LandscapeViewController?
     
@@ -54,36 +51,6 @@ class SearchViewController: UIViewController {
     }
     
     // MARK:- Private Methods
-    // This method first builds a URL string by placing the search text behind the “term=” parameter, and then turns this string into a URL object. Because URL(string:) is a failable initializer, it returns an optional. You force unwrap that using url! to return an actual URL object.
-    func iTunesURL(searchText: String, category: Int) -> URL {
-        //This calls the addingPercentEncoding(withAllowedCharacters:) method to create a new string where all the special characters are escaped, and you use that string for the search term.
-        let kind: String
-        switch category {
-        case 1: kind = "musicTrack"
-        case 2: kind = "software"
-        case 3: kind = "ebook"
-        default: kind = ""
-        }
-        let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
-        
-        let urlString = "https://itunes.apple.com/search?term=\(encodedText)&limit=200&entity=\(kind)"
-        
-        let url = URL(string: urlString)
-        return url!
-    }
-    
-    // You use a JSONDecoder object to convert the response data from the server to a temporary ResultArray object from which you exctract the results property, which is the searchResult array
-    func parse(data: Data) -> [SearchResult] {
-        do {
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(ResultArray.self, from:data)
-            return result.results
-        } catch {
-            print("JSON Error: \(error)")
-            return []
-        }
-    }
-    
     func showNetworkError() {
         let alert = UIAlertController(title: "Whoops...", message: "There was an error accessing the iTunes Store." +
             " Please try again.", preferredStyle: .alert)
@@ -99,7 +66,7 @@ class SearchViewController: UIViewController {
         // 2 Find the scene with the ID “LandscapeViewController” in the storyboard and instantiate it
         landscapeVC = storyboard!.instantiateViewController( withIdentifier: "LandscapeViewController") as? LandscapeViewController
         if let controller = landscapeVC {
-            controller.searchResults = searchResults
+            controller.search = search
             // 3 Set the size and position of the new view controller. This makes the landscape view just as big as the SearchViewController, covering the entire screen.
             controller.view.frame = view.bounds
             controller.view.alpha = 0
@@ -144,7 +111,7 @@ class SearchViewController: UIViewController {
             let detailViewController = segue.destination as! DetailViewController
             // get the correct searchResult to show in the DetailViewController using indexPath
             let indexPath = sender as! IndexPath
-            let searchResult = searchResults[indexPath.row]
+            let searchResult = search.searchResults[indexPath.row]
             detailViewController.searchResult = searchResult
         }
     }
@@ -175,54 +142,17 @@ class SearchViewController: UIViewController {
 // MRAK: - Search Bar Delegate Methods
 extension SearchViewController: UISearchBarDelegate {
     func performSearch() {
-        if !searchBar.text!.isEmpty {
-            // dismiss the keyboard
-            searchBar.resignFirstResponder()
-            // If there is an active data task, this cancels it, making sure that no old searches can ever get in the way of the new search.
-            dataTask?.cancel()
-            isLoading = true
-            tableView.reloadData()
-            // empty the previous stored data every time user click Search button
-            searchResults = []
-            hasSearched = true
-            // 1 Create the URL object using the search text
-            let url = iTunesURL(searchText: searchBar.text!, category: segmentedControl.selectedSegmentIndex)
-            // 2 Get a shared URLSession instance, which uses the default configuration with respect to caching, cookies, and other web stuff
-            let session = URLSession.shared
-            // 3 Create a data task. Data tasks are for fetching the contents of a given URL. The code from the completion handler will be invoked when the data task has received a response from the server.
-            dataTask = session.dataTask(with: url, completionHandler: {
-                data, response, error in
-                // 4 response holds the server’s response code and headers, and data contains the actual data fetched from the server, in this case a blob of JSON.
-                if let error = error as NSError?, error.code == -999 {
-                    // Search was cancelled
-                    return
-                } else if let httpResponse = response as? HTTPURLResponse,
-                    httpResponse.statusCode == 200 {
-                    if let data = data {
-                        self.searchResults = self.parse(data: data)
-                        self.searchResults.sort(by: <)
-                        DispatchQueue.main.async {
-                            // update the user interface
-                            self.isLoading = false
-                            self.tableView.reloadData()
-                        }
-                        return
-                    }
-                } else {
-                    print("Failure! \(response!)")
-                }
-                
-                // something went wrong
-                DispatchQueue.main.async {
-                    self.hasSearched = false
-                    self.isLoading = false
-                    self.tableView.reloadData()
+        search.performSearch(for: searchBar.text!, category: segmentedControl.selectedSegmentIndex,
+            // You now pass a closure to performSearch(for:category:completion:). The code in this closure gets called after the search completes, with the success parameter being either true or false
+            completion: { success in
+                if !success {
                     self.showNetworkError()
                 }
-            })
-            // 5 once you have created the data task, you need to call resume() to start it. This sends the request to the server on a background thread. So, the app is immediately free to continue (URLSession is as asynchronous as they come).
-            dataTask?.resume()
-        }
+                self.tableView.reloadData()
+        })
+
+        tableView.reloadData()
+        searchBar.resignFirstResponder()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -239,32 +169,32 @@ extension SearchViewController: UISearchBarDelegate {
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     // number of cells to display
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if isLoading {
+        if search.isLoading {
             return 1
-        } else if !hasSearched {
+        } else if !search.hasSearched {
             return 0
-        } else if searchResults.count == 0 {
+        } else if search.searchResults.count == 0 {
             return 1
         } else {
-            return searchResults.count
+            return search.searchResults.count
         }
     }
     
     // assign data to cells to display
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if isLoading {
+        if search.isLoading {
             let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.loadingCell, for: indexPath)
             let spinner = cell.viewWithTag(100) as! UIActivityIndicatorView
             spinner.startAnimating()
             return cell
         }
         // assign values from searchResults data model to the cell. nameLabel and artistNameLabel are customer cell's outlets properties defined in the nib file
-        else if searchResults.count == 0 {
+        else if search.searchResults.count == 0 {
             return tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.nothingFoundCell, for: indexPath)
         } else {
             // using the customer table view cell SearchResultCell
             let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCellIdentifiers.searchResultCell, for: indexPath) as! SearchResultCell
-            let searchResult = searchResults[indexPath.row]
+            let searchResult = search.searchResults[indexPath.row]
             cell.configure(for: searchResult)
             return cell
         }
@@ -277,7 +207,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     // make sure user can't select cell when there is no searchResults
     func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        if searchResults.count == 0 || isLoading {
+        if search.searchResults.count == 0 || search.isLoading {
             return nil
         } else {
             return indexPath
