@@ -34,7 +34,7 @@ class Search {
                 data, response, error in
                 var success = false
                 // Was the search cancelled?
-                // 4 response holds the server’s response code and headers, and data contains the actual data fetched from the server, in this case a blob of JSON.
+                // 4 response holds the server’s response code and headers, and data contains the actual data fetched from the server, in this case a blob of JSON.f
                 if let error = error as NSError?, error.code == -999 {
                     return
                 }
