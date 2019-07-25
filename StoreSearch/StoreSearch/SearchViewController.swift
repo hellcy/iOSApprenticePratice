@@ -52,8 +52,10 @@ class SearchViewController: UIViewController {
     
     // MARK:- Private Methods
     func showNetworkError() {
-        let alert = UIAlertController(title: "Whoops...", message: "There was an error accessing the iTunes Store." +
-            " Please try again.", preferredStyle: .alert)
+        let alert = UIAlertController(title: NSLocalizedString("Whoops...",
+           comment: "Error alert: title"), message: NSLocalizedString(
+            "There was an error reading from the iTunes Store. Please try again.",
+            comment: "Error alert: message"), preferredStyle: .alert)
         
         let action = UIAlertAction(title: "OK", style: .default, handler: nil)
         alert.addAction(action)
@@ -101,6 +103,10 @@ class SearchViewController: UIViewController {
                 controller.removeFromParent()
                 //  remove the last strong reference to the LandscapeViewController object
                 self.landscapeVC = nil
+                // remove detailView
+                if self.presentedViewController != nil {
+                    self.dismiss(animated: true, completion: nil)
+                }
             })
         }
     }
@@ -154,6 +160,7 @@ extension SearchViewController: UISearchBarDelegate {
                 self.tableView.reloadData()
             })
             tableView.reloadData()
+            self.landscapeVC?.searchResultsReceived()
             searchBar.resignFirstResponder()
         }
     }

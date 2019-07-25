@@ -5,7 +5,7 @@
 //  Created by yuancheng on 24/7/19.
 //  Copyright © 2019 yuancheng. All rights reserved.
 //
-
+import UIKit
 import Foundation
 
 // The typealias declaration allows you to create a more convenient name for a data type, in order to save some keystrokes and to make the code more readable. Here, you declare a type for your own closure, named SearchComplete. This is a closure that returns no value (it is Void) and takes one parameter, a Bool
@@ -44,6 +44,7 @@ class Search {
         if !text.isEmpty {
             // If there is an active data task, this cancels it, making sure that no old searches can ever get in the way of the new search.
             dataTask?.cancel()
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
             state = .loading
             // 1 Create the URL object using the search text
             let url = iTunesURL(searchText: text, category: category)
@@ -74,6 +75,7 @@ class Search {
                 DispatchQueue.main.async {
                     self.state = newState
                     completion(success)
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 } 
             })
             // 5 once you have created the data task, you need to call resume() to start it. This sends the request to the server on a background thread. So, the app is immediately free to continue (URLSession is as asynchronous as they come).
@@ -83,13 +85,18 @@ class Search {
     
     // This method first builds a URL string by placing the search text behind the “term=” parameter, and then turns this string into a URL object. Because URL(string:) is a failable initializer, it returns an optional. You force unwrap that using url! to return an actual URL object.
     private func iTunesURL(searchText: String, category: Category) -> URL {
+        let locale = Locale.autoupdatingCurrent
+        let language = locale.identifier
+        let countryCode = locale.regionCode ?? "en_US"
         //This calls the addingPercentEncoding(withAllowedCharacters:) method to create a new string where all the special characters are escaped, and you use that string for the search term.
         let kind = category.type
         let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
         
-        let urlString = "https://itunes.apple.com/search?term=\(encodedText)&limit=200&entity=\(kind)"
+        let urlString = "https://itunes.apple.com/search?term=\(encodedText)&limit=200&entity=\(kind)" +
+        "&lang=\(language)&country=\(countryCode)"
         
         let url = URL(string: urlString)
+        print("URL: \(url!)")
         return url!
     }
     

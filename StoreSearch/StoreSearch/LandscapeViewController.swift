@@ -64,9 +64,9 @@ class LandscapeViewController: UIViewController {
             case .notSearchedYet:
                 break
             case .loading:
-                break
+                showSpinner()
             case .noResults:
-                break
+                showNothingFoundLabel()
             case .results(let list):
                 tileButtons(list)
             }
@@ -127,8 +127,9 @@ class LandscapeViewController: UIViewController {
         for (index, result) in searchResults.enumerated() {
             // 1 Create the UIButton object. For debugging purposes, you give each button a title with the array index. If there are 200 results in the search, you also should end up with 200 buttons. Setting the index on the button will help to verify this.
             let button = UIButton(type: .custom)
-            button.setBackgroundImage(UIImage(named: "LandscapeButton"),
-                                      for: .normal)
+            button.setBackgroundImage(UIImage(named: "LandscapeButton"), for: .normal)
+            button.tag = 2000 + index
+            button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
             downloadImage(for: result, andPlaceOn: button)
             button.backgroundColor = UIColor.white
             button.setTitle("\(index)", for: .normal)
@@ -181,7 +182,65 @@ class LandscapeViewController: UIViewController {
             task.resume()
         }
     }
-
+    
+    private func showSpinner() {
+        let spinner = UIActivityIndicatorView(style: .whiteLarge)
+        spinner.center = CGPoint(x: scrollView.bounds.midX + 0.5, y: scrollView.bounds.midY + 0.5)
+        spinner.tag = 1000
+        view.addSubview(spinner)
+        spinner.startAnimating()
+    }
+    
+    private func hideSpinner() {
+        view.viewWithTag(1000)?.removeFromSuperview()
+    }
+    
+    private func showNothingFoundLabel() {
+        let label = UILabel(frame: CGRect.zero)
+        label.text = NSLocalizedString("Nothing Found", comment: "Label: Nothing Found")
+        label.textColor = UIColor.white
+        label.backgroundColor = UIColor.clear
+        
+        label.sizeToFit()
+        
+        var rect = label.frame
+        rect.size.width = ceil(rect.size.width/2) * 2 // make even
+        rect.size.height = ceil(rect.size.height/2) * 2 // make even
+        label.frame = rect
+        
+        label.center = CGPoint(x: scrollView.bounds.midX,
+                               y: scrollView.bounds.midY)
+        view.addSubview(label)
+    }
+    
+    // MARK:- Public Methods
+    func searchResultsReceived() {
+        hideSpinner()
+        
+        switch search.state {
+        case .notSearchedYet, .loading:
+            break
+        case .noResults:
+            showNothingFoundLabel()
+        case .results(let list):
+            tileButtons(list)
+        }
+    }
+    
+    @objc func buttonPressed(_ sender: UIButton) {
+        performSegue(withIdentifier: "ShowDetail", sender: sender)
+    }
+    
+    // MARK:- Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowDetail" {
+            if case .results(let list) = search.state {
+                let detailViewController = segue.destination as! DetailViewController
+                let searchResult = list[(sender as! UIButton).tag - 2000]
+                detailViewController.searchResult = searchResult
+            }
+        }
+    }
 }
 
 // This is a UIScrollViewDelegate method. You figure out what the index of the current page is by looking at the contentOffset property of the scroll view. This property determines how far the scroll view has been scrolled and is updated while you’re dragging the scroll view. Unfortunately, the scroll view doesn’t simply tell us, “The user has flipped to page X”. So, you have to calculate this yourself. If the content offset gets beyond halfway on the page (width/2), the scroll view will move to the next page. In that case, you update the pageControl’s active page number.
