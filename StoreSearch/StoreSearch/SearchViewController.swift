@@ -26,6 +26,8 @@ class SearchViewController: UIViewController {
     
     var landscapeVC: LandscapeViewController?
     
+    weak var splitViewDetail: DetailViewController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -41,8 +43,13 @@ class SearchViewController: UIViewController {
         cellNib = UINib(nibName: TableViewCellIdentifiers.loadingCell, bundle: nil)
         tableView.register(cellNib, forCellReuseIdentifier: TableViewCellIdentifiers.loadingCell)
         
-        // display keyboard when app has open
-        searchBar.becomeFirstResponder()
+        // display keyboard when app has open when using iPhone
+        if UIDevice.current.userInterfaceIdiom != .pad {
+            searchBar.becomeFirstResponder()
+        }
+        
+        // text on DetailView left bar button
+        title = NSLocalizedString("Search", comment: "split view master button")
     }
     
     // MARK: - Action Methods
@@ -120,8 +127,20 @@ class SearchViewController: UIViewController {
                 let indexPath = sender as! IndexPath
                 let searchResult = list[indexPath.row]
                 detailViewController.searchResult = searchResult
+                detailViewController.isPopUp = true
             }
         }
+    }
+    
+    // tell the split view to change its display mode to .primaryHidden to hide the master pane
+    // restore the preferred display mode to .automatic after the animation completes. Otherwise, the master pane stays hidden even in landscape!
+    private func hideMasterPane() {
+        UIView.animate(withDuration: 0.25, animations: {
+            self.splitViewController!.preferredDisplayMode =
+                .primaryHidden
+        }, completion: { _ in
+            self.splitViewController!.preferredDisplayMode = .automatic
+        })
     }
     
     // This method is invoked whenever the trait collection for the view controller changes.
@@ -132,16 +151,28 @@ class SearchViewController: UIViewController {
     // The user interface idiom (is this an iPhone or iPad?)
     // The preferred Dynamic Type font size
     // And a few other things
-    override func willTransition(
-        to newCollection: UITraitCollection,
-        with coordinator: UIViewControllerTransitionCoordinator) {
+    
+    override func willTransition(to newCollection:
+        UITraitCollection, with coordinator:
+        UIViewControllerTransitionCoordinator) {
         super.willTransition(to: newCollection, with: coordinator)
         
-        switch newCollection.verticalSizeClass {
-        case .compact:
-            showLandscape(with: coordinator)
-        case .regular, .unspecified:
-            hideLandscape(with: coordinator)
+        let rect = UIScreen.main.bounds
+        // Once you’ve detected the app runs on an iPhone Plus, you no longer show the landscape view, and you dismiss any Detail pop-up that may still be visible before you rotate to landscape.
+        if (rect.width == 736 && rect.height == 414) || // portrait
+            (rect.width == 414 && rect.height == 736) { // landscape
+            if presentedViewController != nil {
+                dismiss(animated: true, completion: nil)
+            }
+        }
+        // no iPhone plus here
+        else if UIDevice.current.userInterfaceIdiom != .pad {
+            switch newCollection.verticalSizeClass {
+            case .compact:
+                showLandscape(with: coordinator)
+            case .regular, .unspecified:
+                hideLandscape(with: coordinator)
+            }
         }
     }
 
@@ -225,8 +256,20 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        performSegue(withIdentifier: "ShowDetail", sender: indexPath)
+        // On the iPhone, this still does the same as before (pop up a new Detail screen), but on the iPad it assigns the SearchResult object to the existing DetailViewController that lives in the detail pane.
+        searchBar.resignFirstResponder()
+        if view.window!.rootViewController!.traitCollection.horizontalSizeClass == .compact {
+            tableView.deselectRow(at: indexPath, animated: true)
+            performSegue(withIdentifier: "ShowDetail", sender: indexPath)
+        } else {
+            if case .results(let list) = search.state {
+                splitViewDetail?.searchResult = list[indexPath.row]
+            }
+            // hide the master pane when clicked a row if now in landscape mode in iPad
+            if splitViewController!.displayMode != .allVisible {
+                hideMasterPane()
+            }
+        }
     }
     
     // make sure user can't select cell when there is no searchResults
