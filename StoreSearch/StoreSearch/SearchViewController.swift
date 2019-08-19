@@ -185,6 +185,7 @@ extension SearchViewController: UISearchBarDelegate {
             search.performSearch(for: searchBar.text!, category: category,
             // You now pass a closure to performSearch(for:category:completion:). The code in this closure gets called after the search completes, with the success parameter being either true or false
             completion: { success in
+                print("*** closure block")
                 if !success {
                     self.showNetworkError()
                 }

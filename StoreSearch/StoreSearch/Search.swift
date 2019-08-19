@@ -74,6 +74,7 @@ class Search {
 
                 DispatchQueue.main.async {
                     self.state = newState
+                    print("*** main thread")
                     completion(success)
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 } 

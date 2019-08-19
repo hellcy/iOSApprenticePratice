@@ -1,0 +1,11 @@
+platform :ios, '12.2'
+
+# Disable sending stats
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+target 'StoreSearch' do
+  use_frameworks!
+
+  # Pods for StoreSearch
+    pod 'Alamofire'
+end
