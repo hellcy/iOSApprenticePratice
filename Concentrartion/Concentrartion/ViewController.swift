@@ -51,11 +51,10 @@ class ViewController: UIViewController {
     var emoji = [Int:String]()
 
     func emoji(for card: Card) -> String {
-        if emoji[card.identifier] == nil {
-            if emojiArray.count > 0 {
-                let randomIndex = Int(arc4random_uniform(UInt32(emojiArray.count)))
-                emoji[card.identifier] = emojiArray.remove(at: randomIndex)
-            }
+        if emoji[card.identifier] == nil, emojiArray.count > 0 {
+            // take a random emoji out of the array and assign it to the card
+            let randomIndex = Int(arc4random_uniform(UInt32(emojiArray.count)))
+            emoji[card.identifier] = emojiArray.remove(at: randomIndex)
         }
         // check for nil because the value may not be in the Dictionary
         return emoji[card.identifier] ?? "?"
