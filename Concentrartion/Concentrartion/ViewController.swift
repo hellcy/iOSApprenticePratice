@@ -10,16 +10,20 @@ import UIKit
 
 class ViewController: UIViewController {
     // during the initialize of game, we need cardButtons, which is also during the initiation step, so we use lazy keyword, lazy means we don't initialize game until someone wants to use it.
-    lazy var game = Concentration(numberOfPairsOfCards: (cardButtons.count + 1) / 2)
-    var flipCount = 0 {
+    private lazy var game = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
+    
+    var numberOfPairsOfCards: Int {
+        return (cardButtons.count + 1) / 2
+    }
+    private(set) var flipCount = 0 {
         didSet{
             flipCountLabel.text = "Flips: \(flipCount)"
         }
     }
-    @IBOutlet weak var flipCountLabel: UILabel!
-    @IBOutlet var cardButtons: [UIButton]!
+    @IBOutlet private weak var flipCountLabel: UILabel!
+    @IBOutlet private var cardButtons: [UIButton]!
     
-    @IBAction func touchCard(_ sender: UIButton) {
+    @IBAction private func touchCard(_ sender: UIButton) {
         flipCount += 1
         if let cardNumber = cardButtons.firstIndex(of: sender) {
             // update the card Model
@@ -31,7 +35,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func updateViewFromModel() {
+    private func updateViewFromModel() {
         for index in cardButtons.indices {
             let button = cardButtons[index]
             let card = game.cards[index]
@@ -45,12 +49,12 @@ class ViewController: UIViewController {
         }
     }
     
-    var emojiArray = ["🦇","😱","🎃","👻","🙀","👿","🍭","🍎"]
+    private var emojiArray = ["🦇","😱","🎃","👻","🙀","👿","🍭","🍎"]
     
     // create an empty Dictionary
-    var emoji = [Int:String]()
+    private var emoji = [Int:String]()
 
-    func emoji(for card: Card) -> String {
+    private func emoji(for card: Card) -> String {
         if emoji[card.identifier] == nil, emojiArray.count > 0 {
             // take a random emoji out of the array and assign it to the card
             let randomIndex = Int(arc4random_uniform(UInt32(emojiArray.count)))

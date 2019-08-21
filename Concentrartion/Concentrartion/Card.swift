@@ -14,8 +14,8 @@ struct Card {
     var identifier: Int
     
     // static keyword meaning these instance variable and functions are belong to the type Card, not the variable card. You can't call these instances from outside the struct Card, its a property that only goes with the type Card
-    static var identifierFactory = 0
-    static func getUniqueIdentifier() -> Int {
+    private static var identifierFactory = 0
+    private static func getUniqueIdentifier() -> Int {
         identifierFactory += 1
         return identifierFactory
     }
