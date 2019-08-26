@@ -52,16 +52,28 @@ class ViewController: UIViewController {
     private var emojiArray = ["🦇","😱","🎃","👻","🙀","👿","🍭","🍎"]
     
     // create an empty Dictionary
-    private var emoji = [Int:String]()
+    private var emoji = [Card:String]()
 
     private func emoji(for card: Card) -> String {
-        if emoji[card.identifier] == nil, emojiArray.count > 0 {
+        if emoji[card] == nil, emojiArray.count > 0 {
             // take a random emoji out of the array and assign it to the card
-            let randomIndex = Int(arc4random_uniform(UInt32(emojiArray.count)))
-            emoji[card.identifier] = emojiArray.remove(at: randomIndex)
+            emoji[card] = emojiArray.remove(at: emojiArray.count.arc4random)
         }
         // check for nil because the value may not be in the Dictionary
-        return emoji[card.identifier] ?? "?"
+        return emoji[card] ?? "?"
     }
 }
 
+// In this extension we add a new computed variable, which when an integer is trying to get it, it returns a random integer from 0 to that integer.
+// So add this extension because this variable is associated with the type Int, its not related to our game concentration, so its better to put it in an extension. To make our code more clear.
+extension Int {
+    var arc4random: Int {
+        if self > 0 {
+            return Int(arc4random_uniform(UInt32(self)))
+        } else if self < 0 {
+            return -Int(arc4random_uniform(UInt32(abs(self))))
+        } else {
+            return 0
+        }
+    }
+}
