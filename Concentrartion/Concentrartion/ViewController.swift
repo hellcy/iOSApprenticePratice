@@ -15,12 +15,26 @@ class ViewController: UIViewController {
     var numberOfPairsOfCards: Int {
         return (cardButtons.count + 1) / 2
     }
+    
     private(set) var flipCount = 0 {
         didSet{
-            flipCountLabel.text = "Flips: \(flipCount)"
+            updateFlipCountLabel()
         }
     }
-    @IBOutlet private weak var flipCountLabel: UILabel!
+    
+    private func updateFlipCountLabel() {
+        let attributes: [NSAttributedString.Key:Any] = [
+            .strokeWidth : 5.0,
+            .strokeColor : UIColor.orange
+        ]
+        let attributedString = NSAttributedString(string: "Flips: \(flipCount)", attributes: attributes)
+        flipCountLabel.attributedText = attributedString
+    }
+    @IBOutlet private weak var flipCountLabel: UILabel! {
+        didSet {
+            updateFlipCountLabel()
+        }
+    }
     @IBOutlet private var cardButtons: [UIButton]!
     
     @IBAction private func touchCard(_ sender: UIButton) {
@@ -49,15 +63,18 @@ class ViewController: UIViewController {
         }
     }
     
-    private var emojiArray = ["🦇","😱","🎃","👻","🙀","👿","🍭","🍎"]
-    
+    //private var emojiArray = ["🦇","😱","🎃","👻","🙀","👿","🍭","🍎"]
+    private var emojiArray = "🦇😱🎃👻🙀👿🍭🍎"
+
     // create an empty Dictionary
     private var emoji = [Card:String]()
 
     private func emoji(for card: Card) -> String {
         if emoji[card] == nil, emojiArray.count > 0 {
             // take a random emoji out of the array and assign it to the card
-            emoji[card] = emojiArray.remove(at: emojiArray.count.arc4random)
+            // instead of using emojiArray as a array of string, we make emojis a string!
+            let randomEmojiIndex = emojiArray.index(emojiArray.startIndex, offsetBy: emojiArray.count.arc4random)
+            emoji[card] = String(emojiArray.remove(at: randomEmojiIndex))
         }
         // check for nil because the value may not be in the Dictionary
         return emoji[card] ?? "?"
