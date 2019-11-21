@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Alamofire
+
 extension UIImageView {
     func loadImage(url: URL) -> URLSessionDownloadTask {
         let session = URLSession.shared
